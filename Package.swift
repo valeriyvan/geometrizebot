@@ -9,12 +9,14 @@ let package = Package(
     dependencies: [
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "4.76.0"),
+        .package(url: "https://github.com/nerzh/telegram-vapor-bot", from: "2.1.0")
     ],
     targets: [
         .executableTarget(
             name: "App",
             dependencies: [
-                .product(name: "Vapor", package: "vapor")
+                .product(name: "Vapor", package: "vapor"),
+                .product(name: "TelegramVaporBot", package: "telegram-vapor-bot")
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of
