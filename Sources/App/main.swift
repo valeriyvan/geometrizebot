@@ -1,6 +1,9 @@
 import Vapor
 import TelegramVaporBot
 
+let tgToken: String = ProcessInfo.processInfo.environment["geometrizebot_telegram_api_key"] ?? "NO_TG_TOKEN"
+print("tgToken=\(tgToken)")
+
 var env = try Environment.detect()
 try LoggingSystem.bootstrap(from: &env)
 let eventLoop: EventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount * 4)

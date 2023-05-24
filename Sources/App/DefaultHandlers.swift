@@ -1,5 +1,7 @@
 import Vapor
 import TelegramVaporBot
+import Geometrize
+import JPEG
 
 final class DefaultBotHandlers {
 
@@ -8,11 +10,12 @@ final class DefaultBotHandlers {
         await commandPingHandler(app: app, connection: connection)
         await commandHelpHandler(app: app, connection: connection)
         await commandStartHandler(app: app, connection: connection)
-
+        await commandParametersHandler(app: app, connection: connection)
     }
 
     private static func messageHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
-        await connection.dispatcher.add(TGMessageHandler(filters: (.all && !.command.names(["/ping", "/help", "/start"])))
+        print(#function)
+        await connection.dispatcher.add(TGMessageHandler(filters: (.all && !.command.names(["/ping", "/help", "/start", "/parameters"])))
         {
             update, bot in
             let chatId = update.message!.chat.id
@@ -32,26 +35,43 @@ final class DefaultBotHandlers {
                 )
                 try await connection.bot.sendMessage(params: params)
             } else if let photoSizes = update.message?.photo {
-                for photoSize in photoSizes {
-                    let fileId = photoSize.fileId
-                    let file = try await connection.bot.getFile(params: TGGetFileParams(fileId: fileId))
-                    try await connection.bot.sendPhoto(
-                        params: TGSendPhotoParams(
+                let (photoData, filePath) = try await downloadPhoto(bot: connection.bot, tgToken: tgToken, photoSizes: photoSizes, maxHeightAndWidth: 512)
+                switch URL(fileURLWithPath: filePath).pathExtension.lowercased() {
+                case "jpg", "jpeg":
+                    let (rgb, width, height) = try await rgbOfJpeg(data: photoData)
+                    var svg = await geometrizeToSvg(rgb: rgb, width: width, height: height)
+                    let (originalPhotoWidth, originalPhotoHeight) = photoSizes.map { ($0.width, $0.height) }.max { $0.0 < $1.0 }!
+                    let range = svg.range(of: "width=")!.lowerBound ..< svg.range(of: "viewBox=")!.lowerBound
+                    //print(svg[range])
+                    svg.replaceSubrange(range.relative(to: svg), with: " width=\"\(originalPhotoWidth)\" height=\"\(originalPhotoHeight)\" ")
+                    // This works bit doesn't look nice on side of telegram app
+                    try await connection.bot.sendDocument(params:
+                        TGSendDocumentParams(
                             chatId: .chat(chatId),
-                            photo: .fileId(fileId)
+                            document: .file(TGInputFile(filename: "geometrized.svg", data: svg.data(using: .utf8)!, mimeType: "image/svg+xml"))
                         )
                     )
-                    try await connection.bot.sendMessage(params:
-                        TGSendMessageParams(
-                            chatId: .chat(chatId),
-                            text: """
-                            \(file.filePath ?? "no path")
-                            id \(file.fileId)
-                            size \(file.fileSize.map(String.init) ?? "unknown")
-                            """
-                        )
-                    )
+                case "png":
+                    print("Processing PNG is not implemented")
+                default:
+                    print("Cannot process file \(filePath)")
                 }
+                //try await connection.bot.sendPhoto(
+                //    params: TGSendPhotoParams(
+                //        chatId: .chat(chatId),
+                //        photo: .fileId(fileId)
+                //    )
+                //)
+                //try await connection.bot.sendMessage(params:
+                //    TGSendMessageParams(
+                //        chatId: .chat(chatId),
+                //        text: """
+                //        \(filePath ?? "no path")
+                //        id \(file.fileId)
+                //        size \(file.fileSize.map(String.init) ?? "unknown")
+                //        """
+                //    )
+                //)
             } else {
                 let params = TGSendMessageParams(
                     chatId: .chat(chatId),
@@ -69,6 +89,12 @@ final class DefaultBotHandlers {
         })
     }
 
+    private static func commandParametersHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
+        await connection.dispatcher.add(TGCommandHandler(commands: ["/parameters"]) { update, bot in
+            try await update.message?.reply(text: "Coming soon...", bot: bot)
+        })
+    }
+
     private static func commandHelpHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
         await connection.dispatcher.add(TGCommandHandler(commands: ["/help"]) { update, bot in
             try await update.message?.reply(
@@ -76,6 +102,8 @@ final class DefaultBotHandlers {
                     Bot for geometrizing images.
                     /start
                         for starting bot,
+                    /parameters
+                        for setting geometrizing parameters,
                     /ping
                         sends ping message to bot,
                     /help

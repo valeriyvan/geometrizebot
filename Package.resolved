@@ -28,6 +28,15 @@
       }
     },
     {
+      "identity" : "jpeg",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/valeriyvan/jpeg.git",
+      "state" : {
+        "revision" : "6ab5fffa49626116ff6b46510fe9828b71b708af",
+        "version" : "1.0.2"
+      }
+    },
+    {
       "identity" : "multipart-kit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/multipart-kit.git",
@@ -52,6 +61,15 @@
       "state" : {
         "revision" : "b14b7f4c528c942f121c8b860b9410b2bf57825e",
         "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "fee6933f37fde9a5e12a1e4aeaa93fe60116ff2a",
+        "version" : "1.2.2"
       }
     },
     {
@@ -88,6 +106,15 @@
       "state" : {
         "revision" : "33a20e650c33f6d72d822d558333f2085effa3dc",
         "version" : "2.5.0"
+      }
+    },
+    {
+      "identity" : "swift-geometrize",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/valeriyvan/swift-geometrize.git",
+      "state" : {
+        "revision" : "5c849e579b2725ba89588d8c8b912bf1048be148",
+        "version" : "0.9.1"
       }
     },
     {
@@ -163,12 +190,30 @@
       }
     },
     {
+      "identity" : "swift-png",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kelvin13/swift-png.git",
+      "state" : {
+        "revision" : "075dfb248ae327822635370e9d4f94a5d3fe93b2",
+        "version" : "4.0.2"
+      }
+    },
+    {
       "identity" : "swift-regular-expression",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nerzh/swift-regular-expression",
       "state" : {
         "revision" : "19c3e569a8e81da6f7f4ee3b73028c25737d3706",
         "version" : "0.2.4"
+      }
+    },
+    {
+      "identity" : "swiftlintplugin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/lukepistrol/SwiftLintPlugin.git",
+      "state" : {
+        "revision" : "d3ec7fb242ebe1d8e23bf17e58a1e27d43125994",
+        "version" : "0.2.6"
       }
     },
     {
