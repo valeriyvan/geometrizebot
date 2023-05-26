@@ -24,7 +24,10 @@ internal func geometrizeToSvg(rgb: [UInt8], width: Int, height: Int) async -> St
     var shapeData: [ShapeResult] = []
 
     // Hack to add a single background rectangle as the initial shape
-    let rect = Rectangle(x1: 0, y1: 0, x2: Double(targetBitmap.width), y2: Double(targetBitmap.height))
+    let rect = Rectangle(
+        canvasBoundsProvider: { Bounds(xMin: 0, xMax: targetBitmap.width, yMin: 0, yMax: targetBitmap.height) },
+        x1: 0, y1: 0, x2: Double(targetBitmap.width), y2: Double(targetBitmap.height)
+    )
     shapeData.append(ShapeResult(score: 0, color: targetBitmap.averageColor(), shape: rect))
 
     var counter = 0

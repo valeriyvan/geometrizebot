@@ -78,7 +78,6 @@ final class DefaultBotHandlers {
                     text: "Bot has got a message but can extract neither text message not document or image."
                 )
                 try await connection.bot.sendMessage(params: params)
-                return
             }
         })
     }
