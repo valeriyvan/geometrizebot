@@ -4,6 +4,9 @@ import TelegramVaporBot
 let tgToken: String = ProcessInfo.processInfo.environment["geometrizebot_telegram_api_key"] ?? "NO_TG_TOKEN"
 print("tgToken=\(tgToken)")
 
+// nil means no upload
+let s3Bucket: String? = ProcessInfo.processInfo.environment["debug_upload_images_into_s3_bucket"]
+
 var env = try Environment.detect()
 try LoggingSystem.bootstrap(from: &env)
 let eventLoop: EventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount * 4)

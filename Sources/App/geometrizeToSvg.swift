@@ -1,8 +1,12 @@
 import Foundation
 import Geometrize
 
-internal func geometrizeToSvg(rgb: [UInt8], width: Int, height: Int) async -> String {
+internal func geometrizeToSvg(rgb: [UInt8], width: Int, height: Int, filepath: String? = nil) async -> String {
+    print("\(#function): \(filepath != nil ? filepath! + " " : "")width \(width) height \(height); rgb.count = \(rgb.count)")
+
+    print("\(#function): \(filepath != nil ? filepath! + " " : "") Bitmap in")
     let targetBitmap = Bitmap(width: width, height: height, data: rgb)
+    print("\(#function): \(filepath != nil ? filepath! + " " : "") Bitmap out")
 
     let shapeCount: Int = 250
 
@@ -45,7 +49,6 @@ internal func geometrizeToSvg(rgb: [UInt8], width: Int, height: Int) async -> St
     }
 
     let svg = SVGExporter().export(data: shapeData, width: width, height: height)
-    //print(svg)
 
     return svg
 }

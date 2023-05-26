@@ -36,10 +36,19 @@ final class DefaultBotHandlers {
                 try await connection.bot.sendMessage(params: params)
             } else if let photoSizes = update.message?.photo {
                 let (photoData, filePath) = try await downloadPhoto(bot: connection.bot, tgToken: tgToken, photoSizes: photoSizes, maxHeightAndWidth: 512)
+
+                if let s3Bucket {
+                    do {
+                        try await uploadToS3(bucket: "com.w7software.myfirsttestbucket", fileName: UUID().uuidString, data: photoData)
+                    } catch {
+                        print(error)
+                    }
+                }
+
                 switch URL(fileURLWithPath: filePath).pathExtension.lowercased() {
                 case "jpg", "jpeg":
                     let (rgb, width, height) = try await rgbOfJpeg(data: photoData)
-                    var svg = await geometrizeToSvg(rgb: rgb, width: width, height: height)
+                    var svg = await geometrizeToSvg(rgb: rgb, width: width, height: height, filepath: filePath)
                     let (originalPhotoWidth, originalPhotoHeight) = photoSizes.map { ($0.width, $0.height) }.max { $0.0 < $1.0 }!
                     let range = svg.range(of: "width=")!.lowerBound ..< svg.range(of: "viewBox=")!.lowerBound
                     //print(svg[range])
@@ -56,22 +65,6 @@ final class DefaultBotHandlers {
                 default:
                     print("Cannot process file \(filePath)")
                 }
-                //try await connection.bot.sendPhoto(
-                //    params: TGSendPhotoParams(
-                //        chatId: .chat(chatId),
-                //        photo: .fileId(fileId)
-                //    )
-                //)
-                //try await connection.bot.sendMessage(params:
-                //    TGSendMessageParams(
-                //        chatId: .chat(chatId),
-                //        text: """
-                //        \(filePath ?? "no path")
-                //        id \(file.fileId)
-                //        size \(file.fileSize.map(String.init) ?? "unknown")
-                //        """
-                //    )
-                //)
             } else {
                 let params = TGSendMessageParams(
                     chatId: .chat(chatId),
