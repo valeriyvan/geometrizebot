@@ -16,10 +16,10 @@ sudo apt-get install clang libicu-dev libatomic1 build-essential pkg-config
 sudo apt-get install libssl-dev
 # install Swift
 wget https://download.swift.org/swift-5.8-release/ubuntu2204/swift-5.8-RELEASE/swift-5.8-RELEASE-ubuntu22.04.tar.gz
-tar xzf - < swift-5.4.1-RELEASE-ubuntu18.04.tar.gz*
+tar xzf - < swift-5.8-RELEASE-ubuntu22.04.tar.gz*
 sudo mkdir /swift
-sudo mv swift-5.4.1-RELEASE-ubuntu18.04 /swift/5.4.1
-sudo ln -s /swift/5.4.1/usr/bin/swift /usr/bin/swift
+sudo mv swift-5.8-RELEASE-ubuntu22.04.tar.gz /swift/5.8.0
+sudo ln -s /swift/5.8.0/usr/bin/swift /usr/bin/swift
 swift --version # checks Swift version installed
 ```
 
