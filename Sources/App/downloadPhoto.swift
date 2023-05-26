@@ -1,5 +1,8 @@
 import Foundation
 import TelegramVaporBot
+#if canImport(FoundationNetworking)
+    import FoundationNetworking // URLSession on Linux
+#endif
 
 extension String: Error {}
 
@@ -25,9 +28,20 @@ internal func downloadPhoto(bot: TGBot, tgToken: String, photoSizes: [TGPhotoSiz
     guard let url = URL(string: urlString) else {
         throw "Cannot build url from \"\("https://api.telegram.org/file/bot\(tgToken)/\(filePath)\"")"
     }
-    let (data, response) = try await URLSession.shared.data(from: url)
-    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-        throw "Error downloading file"
+
+    // simple `try await URLSession.shared.data(from: url)` is impossible
+    // because `data` property is unavailable on Linux
+    let data: Data? = await withCheckedContinuation { continuation in
+        URLSession.shared.dataTask(with: url) { data, _, _ in
+            continuation.resume(returning: data)
+        }.resume()
     }
+
+    guard let data else {
+        throw "Error downloading file \(filePath)"
+    }
+
+    print("Downloaded photo \(filePath) width \(photoSize.width), height \(photoSize.height)")
+
     return (data, filePath)
 }
