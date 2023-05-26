@@ -1,4 +1,10 @@
-# geometrizebot
+<p align="center" style="padding-bottom:50px;">
+<a href="https://developer.apple.com/swift"><img src="https://img.shields.io/badge/Swift-5.x-orange.svg?style=flat"/></a> 
+<a href="https://github.com/apple/swift-package-manager"><img src="https://img.shields.io/badge/SPM-compatible-brightgreen.svg"/></a> 
+<a href="https://github.com/valeriyvan/swift-geometrizebot"><img src="https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux-lightgrey"/></a> 
+</p>
+
+# geometrizebot Telegram bot
 Telegram bot for geometrizing images available at https://t.me/geometrizebot
 
 How do I run it? I run it in [Digital Ocean](https://m.do.co/c/e843d5778ae5) Ubuntu instance.
