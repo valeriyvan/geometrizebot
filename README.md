@@ -23,8 +23,9 @@ sudo ln -s /swift/5.4.1/usr/bin/swift /usr/bin/swift
 swift --version # checks Swift version installed
 ```
 
-* `export geometrizebot_telegram_api_key="TOKEN"
-* `swift run`
+Provide telegram API token with `export geometrizebot_telegram_api_key="TOKEN"`.
+
+Then run bot with `swift run`.
 
 That's it.
 
