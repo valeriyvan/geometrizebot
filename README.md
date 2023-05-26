@@ -10,8 +10,12 @@ Written in Swift Telegram bot for geometrizing images. Bot is available at https
 Here's how bot is looking at the moment:
 
 <p align="center">
-<img src="https://github.com/valeriyvan/geometrizebot/assets/1630974/7c1fdc70-d6a0-4a09-bebf-e906595440c5"  width="600">
+<img src="https://github.com/valeriyvan/geometrizebot/assets/1630974/7c1fdc70-d6a0-4a09-bebf-e906595440c5" width="600">
 </p>
+
+Here's image from the screenshot above and one geometrized with 250 rotated ellipses:
+
+<img src="https://github.com/valeriyvan/geometrizebot/assets/1630974/9df69434-880c-4bc1-8230-323992cfa2e2" width="500"> <img src="https://github.com/valeriyvan/geometrizebot/assets/1630974/2c920fbf-78a6-4520-a28b-539eda12753c" width="500">
 
 How do I run it? I run it in [Digital Ocean](https://m.do.co/c/e843d5778ae5) Ubuntu instance.
 
