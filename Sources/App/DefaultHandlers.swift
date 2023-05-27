@@ -19,7 +19,7 @@ final class DefaultBotHandlers {
         {
             update, bot in
             let chatId = update.message!.chat.id
-            //let userId = update.message!.from!.id
+            let userId = update.message!.from!.id
             if let text = update.message?.text {
                 let params = TGSendMessageParams(
                     chatId: .chat(chatId),
@@ -39,7 +39,7 @@ final class DefaultBotHandlers {
 
                 if let s3Bucket {
                     do {
-                        try await uploadToS3(bucket: "com.w7software.myfirsttestbucket", fileName: UUID().uuidString, data: photoData)
+                        try await uploadToS3(bucket: "geometrize", fileName: "\(userId)-\(filePath)", data: photoData)
                     } catch {
                         print(error)
                     }
@@ -48,7 +48,7 @@ final class DefaultBotHandlers {
                 switch URL(fileURLWithPath: filePath).pathExtension.lowercased() {
                 case "jpg", "jpeg":
                     let (rgb, width, height) = try await rgbOfJpeg(data: photoData)
-                    var svg = await geometrizeToSvg(rgb: rgb, width: width, height: height, filepath: filePath)
+                    var svg = await geometrizeToSvg(rgb: rgb, width: width, height: height)
                     let (originalPhotoWidth, originalPhotoHeight) = photoSizes.map { ($0.width, $0.height) }.max { $0.0 < $1.0 }!
                     let range = svg.range(of: "width=")!.lowerBound ..< svg.range(of: "viewBox=")!.lowerBound
                     //print(svg[range])
