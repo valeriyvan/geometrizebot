@@ -36,10 +36,10 @@ final class DefaultBotHandlers {
                 try await connection.bot.sendMessage(params: params)
             } else if let photoSizes = update.message?.photo {
                 let (photoData, filePath) = try await downloadPhoto(bot: connection.bot, tgToken: tgToken, photoSizes: photoSizes, maxHeightAndWidth: 512)
-
+                let fileName = URL(fileURLWithPath: filePath).lastPathComponent
                 if let s3Bucket {
                     do {
-                        try await uploadToS3(bucket: "geometrize", fileName: "\(userId)-\(filePath)", data: photoData)
+                        try await uploadToS3(bucket: s3Bucket, fileName: "\(userId)-\(fileName)", data: photoData)
                     } catch {
                         print(error)
                     }
@@ -57,7 +57,7 @@ final class DefaultBotHandlers {
                     try await connection.bot.sendDocument(params:
                         TGSendDocumentParams(
                             chatId: .chat(chatId),
-                            document: .file(TGInputFile(filename: "geometrized.svg", data: svg.data(using: .utf8)!, mimeType: "image/svg+xml"))
+                            document: .file(TGInputFile(filename: "fileName.svg", data: svg.data(using: .utf8)!, mimeType: "image/svg+xml"))
                         )
                     )
                 case "png":
