@@ -1,17 +1,14 @@
 import Foundation
 import Geometrize
 
-internal func geometrizeToSvg(rgb: [UInt8], width: Int, height: Int, filepath: String? = nil) async -> String {
-    print("\(#function): \(filepath != nil ? filepath! + " " : "")width \(width) height \(height); rgb.count = \(rgb.count)")
+internal func geometrizeToSvg(rgb: [UInt8], width: Int, height: Int, shapeTypes: Set<ShapeType>, shapeCount: Int) async -> String {
 
-    print("\(#function): \(filepath != nil ? filepath! + " " : "") Bitmap in")
     let targetBitmap = Bitmap(width: width, height: height, data: rgb)
-    print("\(#function): \(filepath != nil ? filepath! + " " : "") Bitmap out")
 
-    let shapeCount: Int = 250
+    let shapeCount: Int = shapeCount
 
     let runnerOptions = ImageRunnerOptions(
-        shapeTypes: [.rotatedEllipse],
+        shapeTypes: shapeTypes,
         alpha: 128,
         shapeCount: 500,
         maxShapeMutations: 100,

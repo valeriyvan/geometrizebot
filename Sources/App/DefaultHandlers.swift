@@ -48,7 +48,7 @@ final class DefaultBotHandlers {
                 switch URL(fileURLWithPath: filePath).pathExtension.lowercased() {
                 case "jpg", "jpeg":
                     let (rgb, width, height) = try await rgbOfJpeg(data: photoData)
-                    var svg = await geometrizeToSvg(rgb: rgb, width: width, height: height)
+                    var svg = await geometrizeToSvg(rgb: rgb, width: width, height: height, shapeTypes: [.rotatedEllipse], shapeCount: 250)
                     let (originalPhotoWidth, originalPhotoHeight) = photoSizes.map { ($0.width, $0.height) }.max { $0.0 < $1.0 }!
                     // Fix SVG to keep original image size
                     let range = svg.range(of: "width=")!.lowerBound ..< svg.range(of: "viewBox=")!.lowerBound
