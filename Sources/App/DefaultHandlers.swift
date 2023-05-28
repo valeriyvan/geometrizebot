@@ -58,7 +58,7 @@ final class DefaultBotHandlers {
                     try await connection.bot.sendDocument(params:
                         TGSendDocumentParams(
                             chatId: .chat(chatId),
-                            document: .file(TGInputFile(filename: "fileName.svg", data: svg.data(using: .utf8)!, mimeType: "image/svg+xml"))
+                            document: .file(TGInputFile(filename: "\(fileName)-250xRotatedElipses.svg", data: svg.data(using: .utf8)!, mimeType: "image/svg+xml"))
                         )
                     )
                 case "png":
