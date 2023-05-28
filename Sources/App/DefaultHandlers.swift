@@ -36,10 +36,12 @@ final class DefaultBotHandlers {
                 try await connection.bot.sendMessage(params: params)
             } else if let photoSizes = update.message?.photo {
                 let (photoData, filePath) = try await downloadPhoto(bot: connection.bot, tgToken: tgToken, photoSizes: photoSizes, maxHeightAndWidth: 512)
-                let fileName = URL(fileURLWithPath: filePath).lastPathComponent
+                let fileUrl = URL(fileURLWithPath: filePath)
+                let fileNameWithExt = URL(fileURLWithPath: filePath).lastPathComponent
+                let fileNameNoExt = fileNameWithExt.dropLast(fileUrl.pathExtension.count + 1)
                 if let s3Bucket {
                     do {
-                        try await uploadToS3(bucket: s3Bucket, fileName: "\(userId)-\(fileName)", data: photoData)
+                        try await uploadToS3(bucket: s3Bucket, fileName: "\(userId)-\(fileNameWithExt)", data: photoData)
                     } catch {
                         print(error)
                     }
@@ -58,7 +60,7 @@ final class DefaultBotHandlers {
                     try await connection.bot.sendDocument(params:
                         TGSendDocumentParams(
                             chatId: .chat(chatId),
-                            document: .file(TGInputFile(filename: "\(fileName)-250xRotatedElipses.svg", data: svg.data(using: .utf8)!, mimeType: "image/svg+xml"))
+                            document: .file(TGInputFile(filename: "\(fileNameNoExt)-250xRotatedElipses.svg", data: svg.data(using: .utf8)!, mimeType: "image/svg+xml"))
                         )
                     )
                 case "png":
