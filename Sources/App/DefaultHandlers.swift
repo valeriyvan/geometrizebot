@@ -15,7 +15,7 @@ final class DefaultBotHandlers {
 
     private static func messageHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
         print(#function)
-        await connection.dispatcher.add(TGMessageHandler(filters: (.all && !.command.names(["/ping", "/help", "/start", "/parameters"])))
+        await connection.dispatcher.add(TGMessageHandler(filters: (.all && !.command.names(["/ping", "/help", "/start"])))
         {
             update, bot in
             let chatId = update.message!.chat.id
@@ -94,8 +94,6 @@ final class DefaultBotHandlers {
                     Bot for geometrizing images.
                     /start
                         for starting bot,
-                    /parameters
-                        for setting geometrizing parameters,
                     /ping
                         sends ping message to bot,
                     /help
