@@ -11,7 +11,7 @@ internal func uploadToS3(bucket: String, fileName: String, data: Data) async thr
 /// ServiceHandler is borrowed from aws-doc-sdk-examples repo
 ///  https://github.com/awsdocs/aws-doc-sdk-examples/blob/main/swift/example_code/s3/basics/Sources/ServiceHandler/ServiceHandler.swift
 /// A class containing all the code that interacts with the AWS SDK for Swift.
-public class ServiceHandler {
+private class ServiceHandler {
     let client: S3Client
 
     /// Initialize and return a new ``ServiceHandler`` object, which is used to drive the AWS calls
