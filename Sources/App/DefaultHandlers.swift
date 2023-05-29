@@ -5,15 +5,15 @@ import JPEG
 
 final class DefaultBotHandlers {
 
-    static func addHandlers(app: Vapor.Application, connection: TGConnectionPrtcl) async {
-        await messageHandler(app: app, connection: connection)
+    static func addHandlers(app: Vapor.Application, connection: TGConnectionPrtcl) async throws {
+        try await messageHandler(app: app, connection: connection)
         await commandPingHandler(app: app, connection: connection)
         await commandHelpHandler(app: app, connection: connection)
         await commandStartHandler(app: app, connection: connection)
         await commandParametersHandler(app: app, connection: connection)
     }
 
-    private static func messageHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
+    private static func messageHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async throws {
         print(#function)
         await connection.dispatcher.add(TGMessageHandler(filters: (.all && !.command.names(["/ping", "/help", "/start"])))
         {
@@ -46,28 +46,25 @@ final class DefaultBotHandlers {
                         print(error)
                     }
                 }
-
+                let image: Image
                 switch URL(fileURLWithPath: filePath).pathExtension.lowercased() {
                 case "jpg", "jpeg":
-                    let (rgb, width, height) = try await rgbOfJpeg(data: photoData)
-                    var svg = await geometrizeToSvg(rgb: rgb, width: width, height: height, shapeTypes: [.rotatedEllipse], shapeCount: 250)
-                    let (originalPhotoWidth, originalPhotoHeight) = photoSizes.map { ($0.width, $0.height) }.max { $0.0 < $1.0 }!
-                    // Fix SVG to keep original image size
-                    let range = svg.range(of: "width=")!.lowerBound ..< svg.range(of: "viewBox=")!.lowerBound
-                    //print(svg[range])
-                    svg.replaceSubrange(range.relative(to: svg), with: " width=\"\(originalPhotoWidth)\" height=\"\(originalPhotoHeight)\" ")
-                    // This works but attachment doesn't look nice on side of telegram app
-                    try await connection.bot.sendDocument(params:
-                        TGSendDocumentParams(
-                            chatId: .chat(chatId),
-                            document: .file(TGInputFile(filename: "\(fileNameNoExt)-250xRotatedElipses.svg", data: svg.data(using: .utf8)!, mimeType: "image/svg+xml"))
-                        )
-                    )
+                    image = .jpeg(photoData)
                 case "png":
-                    print("Processing PNG is not implemented")
+                    throw "Processing PNG is not implemented"
                 default:
-                    print("Cannot process file \(filePath)")
+                    throw "Cannot process file \(filePath)"
                 }
+                let (originalPhotoWidth, originalPhotoHeight) = photoSizes.map { ($0.width, $0.height) }.max { $0.0 < $1.0 }!
+                let geometrizer = Geometrizer()
+                let svg = try await geometrizer.geometrize(image: image, originalPhotoWidth: originalPhotoWidth, originalPhotoHeight: originalPhotoHeight, shapeTypes: [.rotatedEllipse], shapeCount: 250)
+                // This works but attachment doesn't look nice on side of telegram app
+                try await connection.bot.sendDocument(params:
+                    TGSendDocumentParams(
+                        chatId: .chat(chatId),
+                        document: .file(TGInputFile(filename: "\(fileNameNoExt)-250xRotatedElipses.svg", data: svg.data(using: .utf8)!, mimeType: "image/svg+xml"))
+                    )
+                )
             } else {
                 let params = TGSendMessageParams(
                     chatId: .chat(chatId),
