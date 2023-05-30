@@ -5,15 +5,17 @@ import JPEG
 enum Geometrizer {
 
     // Returns SVGAsyncSequence which produces intermediate geometrizing results
-    // which are SVG strings. The last sequence element is final geometrizing result.
+    // which are SVG strings + thumbnails. The last sequence element is final result.
     static func geometrize(
         image: Image,
+        maxThumbnailSize: Int,
         originalPhotoWidth: Int, originalPhotoHeight: Int,
         shapeTypes: Set<ShapeType>,
         iterations: Int, shapesPerIteration: Int
     ) async throws -> SVGAsyncSequence {
         SVGAsyncSequence(
             image: image,
+            maxThumbnailSize: maxThumbnailSize,
             originalPhotoWidth: originalPhotoWidth,
             originalPhotoHeight: originalPhotoHeight,
             shapeTypes: shapeTypes,
@@ -24,6 +26,7 @@ enum Geometrizer {
 }
 
 struct SVGIterator: AsyncIteratorProtocol {
+    private let thumbnailDownsizeFactor: Int
     private let originalPhotoWidth: Int
     private let originalPhotoHeight: Int
     private let shapeTypes: Set<ShapeType>
@@ -44,8 +47,10 @@ struct SVGIterator: AsyncIteratorProtocol {
     private var stepCounter: Int
 
     let targetBitmap: Bitmap
+
     init(
         image: Image,
+        maxThumbnailSize: Int,
         originalPhotoWidth: Int,
         originalPhotoHeight: Int,
         shapeTypes: Set<ShapeType>,
@@ -60,12 +65,12 @@ struct SVGIterator: AsyncIteratorProtocol {
         // TODO: fix this!
         switch image {
         case .jpeg(let data):
-            (rgb, width, height) = try! rgbOfJpeg(data: data)
+            (rgb, width, height) = try! JPEG.rgba(fromJPEGData: data)
         case .png(let data):
             print("Encounter PNG. This will crash!!!")
-            (rgb, width, height) = try! rgbOfJpeg(data: data)
+            (rgb, width, height) = try! JPEG.rgba(fromJPEGData: data)
         }
-
+        thumbnailDownsizeFactor = max(width, height) / maxThumbnailSize
         targetBitmap = Bitmap(width: width, height: height, data: rgb)
 
         iterationCounter = 0
@@ -99,7 +104,7 @@ struct SVGIterator: AsyncIteratorProtocol {
         )
     }
 
-    mutating func next() async throws -> String? {
+    mutating func next() async throws -> GeometrizingResult? {
         guard iterationCounter < iterations else { return nil }
         var stepShapeData: [ShapeResult] = []
         while stepShapeData.count < shapesPerIteration {
@@ -125,15 +130,21 @@ struct SVGIterator: AsyncIteratorProtocol {
         svg.replaceSubrange(range.relative(to: svg), with: " width=\"\(originalPhotoWidth)\" height=\"\(originalPhotoHeight)\" ")
 
         print("Iteration \(iterationCounter), shapes in iteration \(stepShapeData.count), total shapes \(shapeData.count)")
-        return svg
+        return GeometrizingResult(svg: svg, thumbnail: runner.currentBitmap)
     }
 
 }
 
+struct GeometrizingResult {
+    let svg: String
+    let thumbnail: Bitmap
+}
+
 struct SVGAsyncSequence: AsyncSequence {
-    typealias Element = String
+    typealias Element = GeometrizingResult
 
     let image: Image
+    let maxThumbnailSize: Int
     let originalPhotoWidth: Int
     let originalPhotoHeight: Int
     let shapeTypes: Set<ShapeType>
@@ -143,6 +154,7 @@ struct SVGAsyncSequence: AsyncSequence {
     func makeAsyncIterator() -> SVGIterator {
         SVGIterator(
             image: image,
+            maxThumbnailSize: maxThumbnailSize,
             originalPhotoWidth: originalPhotoWidth,
             originalPhotoHeight: originalPhotoHeight,
             shapeTypes: shapeTypes,
@@ -150,15 +162,4 @@ struct SVGAsyncSequence: AsyncSequence {
             shapesPerIteration: shapesPerIteration
         )
     }
-}
-
-private func rgbOfJpeg(data: Data) throws -> ([UInt8], width: Int, height: Int) {
-    var bytestreamSource = DataBytestreamSource(data: data)
-    guard let image: JPEG.Data.Rectangular<JPEG.Common> = try .decompress(stream: &bytestreamSource) else {
-        throw "Cannot decompress JPEG data"
-    }
-    let rgb: [JPEG.RGB] = image.unpack(as: JPEG.RGB.self)
-    let (width, height) = image.size
-    let data: [UInt8] = rgb.flatMap({ [$0.r, $0.g, $0.b, 255] })
-    return (data, width, height)
 }

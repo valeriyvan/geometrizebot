@@ -63,7 +63,15 @@ final class DefaultBotHandlers {
                 let (originalPhotoWidth, originalPhotoHeight) = photoSizes.map { ($0.width, $0.height) }.max { $0.0 < $1.0 }!
                 let iterations = 5
                 let shapesPerIteration = 50
-                let svgSequence = try await Geometrizer.geometrize(image: image, originalPhotoWidth: originalPhotoWidth, originalPhotoHeight: originalPhotoHeight, shapeTypes: [.rotatedEllipse], iterations: iterations, shapesPerIteration: shapesPerIteration)
+                let svgSequence = try await Geometrizer.geometrize(
+                    image: image,
+                    maxThumbnailSize: 64,
+                    originalPhotoWidth: originalPhotoWidth,
+                    originalPhotoHeight: originalPhotoHeight,
+                    shapeTypes: [.rotatedEllipse],
+                    iterations: iterations,
+                    shapesPerIteration: shapesPerIteration
+                )
                 var shapesCounter = 50
                 var iteration = 0
                 var msg = "Have started geometrizing image \(fileNameWithExt)."
@@ -77,35 +85,25 @@ final class DefaultBotHandlers {
                     replyToMessageId: messageId
                 )
                 try await connection.bot.sendMessage(params: params)
-                for try await svg in svgSequence {
-                    // This works but attachment doesn't look nice on side of telegram app
-                    if iterations > 1 {
-                        let params1 = TGSendMessageParams(
-                            chatId: .chat(chatId),
-                            messageThreadId: nil, // TODO: ???
-                            text: "It's \(iteration + 1)/\(iterations) intermediate result of geometrizing image \(fileNameWithExt).",
-                            replyToMessageId: messageId
-                        )
-                        try await connection.bot.sendMessage(params: params1)
-                    }
+                for try await result in svgSequence {
                     let filename = "\(fileNameNoExt)-\(shapesCounter)xRotatedElipses.svg"
                     let file = TGInputFile(
                         filename: filename,
-                        data: svg.data(using: .utf8)!,
+                        data: result.svg.data(using: .utf8)!,
                         mimeType: "image/svg+xml"
                     )
-                    // TODO: make preview of SVG
-                    //let thumbnail = TGInputFile(
-                    //    filename: filename,
-                    //    data: image.data,
-                    //    mimeType: image.mimeType
-                    //)
+                    let thumbnail = TGInputFile(
+                        filename: filename,
+                        data: try result.thumbnail.pngData(),
+                        mimeType: "image/x-png"
+                    )
                     try await connection.bot.sendDocument(params:
                         TGSendDocumentParams(
                             chatId: .chat(chatId),
                             messageThreadId: nil,  // TODO: ???
                             document: .file(file),
-                            thumbnail: nil,        // TODO: make preview of SVG
+                            thumbnail: .file(thumbnail),
+                            caption: iterations > 1 ? "\(iteration + 1)/\(iterations)" : nil,
                             replyToMessageId: messageId
                         )
                     )
