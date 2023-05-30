@@ -19,11 +19,14 @@ final class DefaultBotHandlers {
         {
             update, bot in
             let chatId = update.message!.chat.id
+            let messageId = update.message!.messageId
             let userId = update.message!.from!.id
             if let text = update.message?.text {
                 let params = TGSendMessageParams(
                     chatId: .chat(chatId),
-                    text: "Reply to \"\(text)\""
+                    messageThreadId: nil, // ???
+                    text: "Reply to \"\(text)\"",
+                    replyToMessageId: messageId
                 )
                 try await connection.bot.sendMessage(params: params)
             } else if let document = update.message?.document {
@@ -31,7 +34,9 @@ final class DefaultBotHandlers {
                 try await connection.bot.getFile(params: TGGetFileParams(fileId: fileId))
                 let params = TGSendMessageParams(
                     chatId: .chat(chatId),
-                    text: fileId
+                    messageThreadId: nil, // TODO: ???
+                    text: fileId,
+                    replyToMessageId: messageId
                 )
                 try await connection.bot.sendMessage(params: params)
             } else if let photoSizes = update.message?.photo {
@@ -67,7 +72,9 @@ final class DefaultBotHandlers {
                 }
                 let params = TGSendMessageParams(
                     chatId: .chat(chatId),
-                    text: msg
+                    messageThreadId: nil, // TODO: ???
+                    text: msg,
+                    replyToMessageId: messageId
                 )
                 try await connection.bot.sendMessage(params: params)
                 for try await svg in svgSequence {
@@ -75,7 +82,9 @@ final class DefaultBotHandlers {
                     if iterations > 1 {
                         let params1 = TGSendMessageParams(
                             chatId: .chat(chatId),
-                            text: "It's \(iteration + 1)/\(iterations) intermediate result of geometrizing image \(fileNameWithExt)."
+                            messageThreadId: nil, // TODO: ???
+                            text: "It's \(iteration + 1)/\(iterations) intermediate result of geometrizing image \(fileNameWithExt).",
+                            replyToMessageId: messageId
                         )
                         try await connection.bot.sendMessage(params: params1)
                     }
@@ -85,10 +94,19 @@ final class DefaultBotHandlers {
                         data: svg.data(using: .utf8)!,
                         mimeType: "image/svg+xml"
                     )
+                    // TODO: make preview of SVG
+                    //let thumbnail = TGInputFile(
+                    //    filename: filename,
+                    //    data: image.data,
+                    //    mimeType: image.mimeType
+                    //)
                     try await connection.bot.sendDocument(params:
                         TGSendDocumentParams(
                             chatId: .chat(chatId),
-                            document: .file(file)
+                            messageThreadId: nil,  // TODO: ???
+                            document: .file(file),
+                            thumbnail: nil,        // TODO: make preview of SVG
+                            replyToMessageId: messageId
                         )
                     )
                     shapesCounter += shapesPerIteration
@@ -97,7 +115,9 @@ final class DefaultBotHandlers {
             } else {
                 let params = TGSendMessageParams(
                     chatId: .chat(chatId),
-                    text: "Bot has got a message but can extract neither text message not document or image."
+                    messageThreadId: nil, // TODO: ???
+                    text: "Bot has got a message but can extract neither text message not document or image.",
+                    replyToMessageId: messageId
                 )
                 try await connection.bot.sendMessage(params: params)
             }
@@ -136,9 +156,12 @@ final class DefaultBotHandlers {
     private static func commandStartHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
         await connection.dispatcher.add(TGCommandHandler(commands: ["/start"]) { update, bot in
             let chatId = update.message!.chat.id
+            let messageId = update.message!.messageId
             let params = TGSendMessageParams(
                 chatId: .chat(chatId),
-                text: "Try send an image..."
+                messageThreadId: nil, // TODO: ???
+                text: "Try send an image...",
+                replyToMessageId: messageId
             )
             try await connection.bot.sendMessage(params: params)
         })
