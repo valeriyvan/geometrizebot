@@ -5,7 +5,7 @@
 </p>
 
 # geometrizebot Telegram bot
-Written in Swift Telegram bot for geometrizing images. Bot is available at https://t.me/geometrizebot. Uses Swift Package [swift-geometrize](swift-geometrize) for geometrizing images.
+Written in Swift Telegram bot for geometrizing images. Bot is available at https://t.me/geometrizebot. Uses Swift Package [swift-geometrize](https://github.com/valeriyvan/swift-geometrize) for geometrizing images.
 
 Here's how bot is looking at the moment:
 
