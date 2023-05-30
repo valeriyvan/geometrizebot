@@ -140,8 +140,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/valeriyvan/swift-geometrize.git",
       "state" : {
-        "revision" : "b3085c699630d2390913f677707ec215c73f8d63",
-        "version" : "0.9.3"
+        "revision" : "2d1c538c4bd10d1fc669833f0b0a1dcdcd4d8ee5",
+        "version" : "0.9.6"
       }
     },
     {

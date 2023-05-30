@@ -152,18 +152,6 @@ struct SVGAsyncSequence: AsyncSequence {
     }
 }
 
-private extension Rectangle {
-
-    // Rectangle taking whole size of canvas
-    convenience init(canvasWidth width: Int, height: Int) {
-        self.init(
-            canvasBoundsProvider: { Bounds(xMin: 0, xMax: width, yMin: 0, yMax: height) },
-            x1: 0.0, y1: 0.0, x2: Double(width), y2: Double(height)
-        )
-    }
-
-}
-
 private func rgbOfJpeg(data: Data) throws -> ([UInt8], width: Int, height: Int) {
     var bytestreamSource = DataBytestreamSource(data: data)
     guard let image: JPEG.Data.Rectangular<JPEG.Common> = try .decompress(stream: &bytestreamSource) else {
