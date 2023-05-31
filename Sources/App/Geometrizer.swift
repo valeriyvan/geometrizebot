@@ -129,7 +129,7 @@ struct SVGIterator: AsyncIteratorProtocol {
         let range = svg.range(of: "width=")!.lowerBound ..< svg.range(of: "viewBox=")!.lowerBound
         svg.replaceSubrange(range.relative(to: svg), with: " width=\"\(originalPhotoWidth)\" height=\"\(originalPhotoHeight)\" ")
 
-        print("Iteration \(iterationCounter), shapes in iteration \(stepShapeData.count), total shapes \(shapeData.count)")
+        print("Iteration \(iterationCounter) complete, \(stepShapeData.count) shapes in iteration, \(shapeData.count) shapes in total.")
         return GeometrizingResult(svg: svg, thumbnail: runner.currentBitmap)
     }
 
