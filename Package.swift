@@ -10,8 +10,9 @@ let package = Package(
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "4.76.0"),
         .package(url: "https://github.com/nerzh/telegram-vapor-bot", from: "2.1.0"),
-        .package(url: "https://github.com/valeriyvan/swift-geometrize.git", from: "0.9.3"),
+        .package(url: "https://github.com/valeriyvan/swift-geometrize.git", from: "0.9.7"),
         .package(url: "https://github.com/valeriyvan/jpeg.git", from: "1.0.2"),
+        .package(url: "https://github.com/kelvin13/swift-png.git", from: "4.0.2"),
         .package(url: "https://github.com/awslabs/aws-sdk-swift", exact: "0.17.0")
     ],
     targets: [
@@ -22,7 +23,7 @@ let package = Package(
                 .product(name: "TelegramVaporBot", package: "telegram-vapor-bot"),
                 .product(name: "Geometrize", package: "swift-geometrize"),
                 .product(name: "JPEG", package: "jpeg"),
-                //.product(name: "AWSSwiftSDK", package: "AWSSwiftSDK"),
+                .product(name: "PNG", package: "swift-png"),
                 .product(name: "AWSS3", package: "aws-sdk-swift"),
 
             ],
