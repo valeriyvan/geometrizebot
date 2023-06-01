@@ -10,9 +10,14 @@ Geometrizebot is written in Swift Telegram bot for geometrizing images. Bot is a
 
 Here's how bot is looking at the moment:
 
-<p align="center">
-<img src="https://github.com/valeriyvan/geometrizebot/assets/1630974/7c1fdc70-d6a0-4a09-bebf-e906595440c5" width="600">
-</p>
+<table align="center">
+<tr>
+<td align="center"><img src="https://github.com/valeriyvan/geometrizebot/assets/1630974/db02c73c-0097-459a-931f-37078782d30d" width="250"></td>
+<td align="center"><img src="https://github.com/valeriyvan/geometrizebot/assets/1630974/e5d294ff-95c7-48df-b5d4-a84bc81d7334" width="250"></td>
+<td align="center"><img src="https://github.com/valeriyvan/geometrizebot/assets/1630974/0a56a760-bf95-4f9d-80fa-03f752048c0d" width="250"></td>
+<td align="center"><img src="https://github.com/valeriyvan/geometrizebot/assets/1630974/ea255b0a-8994-4a0f-8451-dcf7bd65c339" width="250"></td>
+</tr>
+</table>
 
 Here's image from the screenshot above and one geometrized with 250 rotated ellipses:
 
@@ -30,7 +35,9 @@ Here is logo bot made:
 <img src="https://github.com/valeriyvan/geometrizebot/assets/1630974/d4a02096-49f1-4d5a-b8b0-23aeee0c1864" width="400">
 </p>
 
-How do I run bot? I run it in [Digital Ocean](https://m.do.co/c/e843d5778ae5) Ubuntu droplet.
+## How do I run bot? 
+
+I run it in [Digital Ocean](https://m.do.co/c/e843d5778ae5) Ubuntu droplet.
 
 In fresh instance install dependencies:
 ```bash
