@@ -10,37 +10,40 @@ final class DefaultBotHandlers {
         await commandPingHandler(app: app, connection: connection)
         await commandHelpHandler(app: app, connection: connection)
         await commandStartHandler(app: app, connection: connection)
-        await commandParametersHandler(app: app, connection: connection)
     }
 
-    private static func messageHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async throws {
-        print(#function)
-        await connection.dispatcher.add(TGMessageHandler(filters: (.all && !.command.names(["/ping", "/help", "/start"])))
-        {
-            update, bot in
-            let chatId = update.message!.chat.id
-            let messageId = update.message!.messageId
-            let userId = update.message!.from!.id
-            if let text = update.message?.text {
-                let params = TGSendMessageParams(
-                    chatId: .chat(chatId),
-                    messageThreadId: nil, // ???
-                    text: "Reply to \"\(text)\"",
-                    replyToMessageId: messageId
-                )
-                try await connection.bot.sendMessage(params: params)
-            } else if let document = update.message?.document {
-                let fileId = document.fileId
-                try await connection.bot.getFile(params: TGGetFileParams(fileId: fileId))
-                let params = TGSendMessageParams(
-                    chatId: .chat(chatId),
-                    messageThreadId: nil, // TODO: ???
-                    text: fileId,
-                    replyToMessageId: messageId
-                )
-                try await connection.bot.sendMessage(params: params)
-            } else if let photoSizes = update.message?.photo {
-                let (photoData, filePath) = try await downloadPhoto(bot: connection.bot, tgToken: tgToken, photoSizes: photoSizes, maxHeightAndWidth: 512)
+    struct GeometrizingData {
+        let messageId: Int
+        let image: Image
+        let fileUrl: URL
+        let originalPhotoWidth: Int
+        let originalPhotoHeight: Int
+    }
+
+    enum DialogState {
+        case waitImageFromUser
+        case waitShapeType
+        case waitShapeCount
+    }
+
+    static var imageDatas: [Int64 /* userId */: GeometrizingData] = [:]
+
+    // Kept between sessions to be reused by user choosing option "As last time"
+    static var shapeTypes: [Int64 /* userId */: Set<ShapeType>] = [:]
+
+    // Kept between sessions to be reused by user choosing option "As last time"
+    static var shapeCounts: [Int64 /* userId */: Int] = [:]
+
+    typealias Action = (TGUpdate, TGBot) async throws -> DialogState
+
+    static var state = [Int64 /* userId */: DialogState]()
+
+    static var actions: [DialogState: Action] =
+        [
+            .waitImageFromUser: { update, bot in
+                print("waitImageFromUser")
+                guard let message = update.message, let userId = message.from?.id, let photoSizes = message.photo else { return .waitImageFromUser }
+                let (photoData, filePath) = try await downloadPhoto(bot: bot, tgToken: tgToken, photoSizes: photoSizes, maxHeightAndWidth: 512)
                 let fileUrl = URL(fileURLWithPath: filePath)
                 let fileNameWithExt = URL(fileURLWithPath: filePath).lastPathComponent
                 let fileNameNoExt = fileNameWithExt.dropLast(fileUrl.pathExtension.count + 1)
@@ -61,35 +64,138 @@ final class DefaultBotHandlers {
                     throw "Cannot process file \(filePath)"
                 }
                 let (originalPhotoWidth, originalPhotoHeight) = photoSizes.map { ($0.width, $0.height) }.max { $0.0 < $1.0 }!
-                let iterations = 5
-                let shapesPerIteration = 50
-                let svgSequence = try await Geometrizer.geometrize(
+                imageDatas[userId] = GeometrizingData(
+                    messageId: message.messageId,
                     image: image,
-                    maxThumbnailSize: 64,
+                    fileUrl: URL(fileURLWithPath: filePath),
                     originalPhotoWidth: originalPhotoWidth,
-                    originalPhotoHeight: originalPhotoHeight,
-                    shapeTypes: [.rotatedEllipse],
+                    originalPhotoHeight: originalPhotoHeight
+                )
+                let keyboard = TGReplyKeyboardMarkup(
+                    keyboard:
+                        [[TGKeyboardButton(text: "Rectangles"),
+                          TGKeyboardButton(text: "Rotated rectangles")
+                         ],
+                         [TGKeyboardButton(text: "Triangles")],
+                         [TGKeyboardButton(text: "Circles"),
+                          TGKeyboardButton(text: "Ellipses"),
+                          TGKeyboardButton(text: "Rotated Ellipses")
+                         ],
+                         [TGKeyboardButton(text: "Lines"),
+                          TGKeyboardButton(text: "Polylines")],
+                         [TGKeyboardButton(text: "Quadratic bezier lines")],
+                         [TGKeyboardButton(text: "Surprise me!")]
+                        ],
+                    oneTimeKeyboard: true
+                )
+                let params = TGSendMessageParams(
+                    chatId: .chat(message.chat.id),
+                    messageThreadId: nil, // TODO: ???
+                    text: "How would you like your image to be geometrized?",
+                    replyToMessageId: message.messageId,
+                    replyMarkup: .replyKeyboardMarkup(keyboard)
+                )
+                try await bot.sendMessage(params: params)
+                return .waitShapeType
+            },
+
+            .waitShapeType: { update, bot in
+                print("waitShapeType")
+                guard let message = update.message, let userId = message.from?.id, let text = message.text else { return .waitShapeType }
+                let types: Set<ShapeType>
+                switch text {
+                    case "Rectangles": types = [.rectangle]
+                    case "Rotated rectangles": types = [.rotatedRectangle]
+                    case "Triangles": types = [.triangle]
+                    case "Circles": types = [.circle]
+                    case "Ellipses": types = [.ellipse]
+                    case "Rotated Ellipses": types = [.rotatedEllipse]
+                    case "Lines": types = [.line]
+                    case "Polylines": types = [.polyline]
+                    case "Quadratic bezier lines": types = [.quadraticBezier]
+                    case "Surprise me!": types = Set(ShapeType.allCases)
+                    default: return .waitShapeType
+                }
+                shapeTypes[userId] = types
+                let keyboard = TGReplyKeyboardMarkup(
+                    keyboard:
+                        // Number should divide on 5 without remainder as .waitShapeCount step rely on that
+                        [[TGKeyboardButton(text: "50"),
+                          TGKeyboardButton(text: "100"),
+                          TGKeyboardButton(text: "150")
+                         ],
+                         [TGKeyboardButton(text: "200"),
+                          TGKeyboardButton(text: "250"),
+                          TGKeyboardButton(text: "500")
+                         ],
+                         [TGKeyboardButton(text: "1000")]
+                        ],
+                    oneTimeKeyboard: true
+                )
+                let params = TGSendMessageParams(
+                    chatId: .chat(message.chat.id),
+                    messageThreadId: nil, // TODO: ???
+                    text: "How many shapes?",
+                    replyToMessageId: message.messageId,
+                    replyMarkup: .replyKeyboardMarkup(keyboard)
+                )
+                try await bot.sendMessage(params: params)
+                return .waitShapeCount
+            },
+
+            .waitShapeCount: { update, bot in
+                guard let message = update.message, let userId = message.from?.id, let shapeCount = message.text.flatMap(Int.init), shapeCount > 0 && shapeCount < 5000 else { return .waitShapeCount }
+                shapeCounts[userId] = shapeCount
+                guard let imageData = imageDatas[userId], let types = shapeTypes[userId], let shapeCount = shapeCounts[userId]  else {
+                    throw "Internal inconsistency"
+                }
+
+                let shapesPerIteration: Int
+                switch shapeCount {
+                case ...100: shapesPerIteration = shapeCount
+                case 101...200: shapesPerIteration = shapeCount / 2
+                default: shapesPerIteration = shapeCount / 5
+                }
+                let iterations = shapeCount / shapesPerIteration
+
+                let params = TGSendMessageParams(
+                    chatId: .chat(message.chat.id),
+                    messageThreadId: nil, // TODO: ???
+                    text: "Have started geometrizing with \(shapeCount) \(types.map(\.rawValueCapitalized).joined(separator: "+"))." +
+                        (iterations > 1 ?
+                             " Will post here \(iterations - 1) intermediary geometrizing results and then final one." :
+                            ""
+                        ),
+                    replyToMessageId: message.messageId
+                )
+                try await bot.sendMessage(params: params)
+
+                let svgSequence = try await Geometrizer.geometrize(
+                    image: imageData.image,
+                    maxThumbnailSize: 64,
+                    originalPhotoWidth: imageData.originalPhotoWidth,
+                    originalPhotoHeight: imageData.originalPhotoHeight,
+                    shapeTypes: types,
                     iterations: iterations,
                     shapesPerIteration: shapesPerIteration
                 )
-                var shapesCounter = 50
+                var shapesCounter = shapesPerIteration
                 var iteration = 0
-                var msg = "Have started geometrizing image \(fileNameWithExt)."
-                if iterations > 1 {
-                    msg += " Will post here \(iterations - 1) intermediary geometrizing results and then final."
-                }
-                let params = TGSendMessageParams(
-                    chatId: .chat(chatId),
-                    messageThreadId: nil, // TODO: ???
-                    text: msg,
-                    replyToMessageId: messageId
-                )
-                try await connection.bot.sendMessage(params: params)
+                let fileNameNoExt = imageData.fileUrl.lastPathComponent.dropLast(imageData.fileUrl.pathExtension.count + 1)
                 for try await result in svgSequence {
-                    let filename = "\(fileNameNoExt)-\(shapesCounter)xRotatedElipses.svg"
+                    let filename = "\(fileNameNoExt)-\(shapesCounter)x\(types.map(\.rawValueCapitalized).joined(separator: "+")).svg"
+                    let svgData = result.svg.data(using: .utf8)!
+                    if let s3Bucket {
+                        do {
+                            try await uploadToS3(bucket: s3Bucket, fileName: "\(userId)-\(filename)", data: svgData)
+                        } catch {
+                            print(error)
+                        }
+                    }
+
                     let file = TGInputFile(
                         filename: filename,
-                        data: result.svg.data(using: .utf8)!,
+                        data: svgData,
                         mimeType: "image/svg+xml"
                     )
                     let thumbnail = TGInputFile(
@@ -97,45 +203,45 @@ final class DefaultBotHandlers {
                         data: try result.thumbnail.pngData(),
                         mimeType: "image/x-png"
                     )
-                    try await connection.bot.sendDocument(params:
+                    try await bot.sendDocument(params:
                         TGSendDocumentParams(
-                            chatId: .chat(chatId),
+                            chatId: .chat(message.chat.id),
                             messageThreadId: nil,  // TODO: ???
                             document: .file(file),
                             thumbnail: .file(thumbnail),
                             caption: iterations > 1 ? "\(iteration + 1)/\(iterations)" : nil,
-                            replyToMessageId: messageId
+                            replyToMessageId: imageData.messageId
                         )
                     )
                     shapesCounter += shapesPerIteration
                     iteration += 1
                 }
-            } else {
-                let params = TGSendMessageParams(
-                    chatId: .chat(chatId),
-                    messageThreadId: nil, // TODO: ???
-                    text: "Bot has got a message but can extract neither text message not document or image.",
-                    replyToMessageId: messageId
-                )
-                try await connection.bot.sendMessage(params: params)
+                return .waitImageFromUser
             }
-        })
+
+        ]
+
+    private static func messageHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async throws {
+        let filters: TGFilter = .all && !.command.names(["/ping", "/help", "/start"])
+        let handler = TGMessageHandler(filters: filters) { update, bot in
+            // Can react only on messages and thous from users.
+            guard let message = update.message, let user = message.from else { return }
+            let dialogState = state[user.id, default: .waitImageFromUser]
+            guard let action = actions[dialogState] else { throw "No action for state \(dialogState)" }
+            state[user.id] = try await action(update, bot)
+        }
+        await connection.dispatcher.add(handler)
     }
 
     private static func commandPingHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
-        await connection.dispatcher.add(TGCommandHandler(commands: ["/ping"]) { update, bot in
+        let handler = TGCommandHandler(commands: ["/ping"]) { update, bot in
             try await update.message?.reply(text: "pong", bot: bot)
-        })
-    }
-
-    private static func commandParametersHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
-        await connection.dispatcher.add(TGCommandHandler(commands: ["/parameters"]) { update, bot in
-            try await update.message?.reply(text: "Coming soon...", bot: bot)
-        })
+        }
+        await connection.dispatcher.add(handler)
     }
 
     private static func commandHelpHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
-        await connection.dispatcher.add(TGCommandHandler(commands: ["/help"]) { update, bot in
+        let handler = TGCommandHandler(commands: ["/help"]) { update, bot in
             try await update.message?.reply(
                 text: """
                     Bot for geometrizing images.
@@ -148,21 +254,25 @@ final class DefaultBotHandlers {
                     """,
                 bot: bot
             )
-        })
+        }
+        await connection.dispatcher.add(handler)
     }
 
     private static func commandStartHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
-        await connection.dispatcher.add(TGCommandHandler(commands: ["/start"]) { update, bot in
-            let chatId = update.message!.chat.id
-            let messageId = update.message!.messageId
+        let handler = TGCommandHandler(commands: ["/start"]) { update, bot in
+            guard let message = update.message, let userId = message.from?.id else {
+                return
+            }
             let params = TGSendMessageParams(
-                chatId: .chat(chatId),
+                chatId: .chat(message.chat.id),
                 messageThreadId: nil, // TODO: ???
                 text: "Try send an image...",
-                replyToMessageId: messageId
+                replyToMessageId: message.messageId
             )
+            state[userId] = .waitImageFromUser
             try await connection.bot.sendMessage(params: params)
-        })
+        }
+        await connection.dispatcher.add(handler)
     }
 
 }
