@@ -128,7 +128,10 @@ final class DefaultBotHandlers {
                           TGKeyboardButton(text: "250"),
                           TGKeyboardButton(text: "500")
                          ],
-                         [TGKeyboardButton(text: "1000")]
+                         [TGKeyboardButton(text: "1000"),
+                          TGKeyboardButton(text: "5000"),
+                          TGKeyboardButton(text: "10000")
+                         ]
                         ],
                     oneTimeKeyboard: true
                 )
@@ -144,7 +147,7 @@ final class DefaultBotHandlers {
             },
 
             .waitShapeCount: { update, bot in
-                guard let message = update.message, let userId = message.from?.id, let shapeCount = message.text.flatMap(Int.init), shapeCount > 0 && shapeCount < 5000 else { return .waitShapeCount }
+                guard let message = update.message, let userId = message.from?.id, let shapeCount = message.text.flatMap(Int.init), shapeCount > 0 && shapeCount <= 10000 else { return .waitShapeCount }
                 shapeCounts[userId] = shapeCount
                 guard let imageData = imageDatas[userId], let types = shapeTypes[userId], let shapeCount = shapeCounts[userId]  else {
                     throw "Internal inconsistency"
