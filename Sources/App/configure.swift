@@ -11,8 +11,8 @@ public func configure(_ app: Application) async throws {
     /// set level of debug if you needed
     TGBot.log.logLevel = app.logger.logLevel
     let bot: TGBot = .init(app: app, botId: tgToken)
-    await TGBOT.setConnection(try await TGLongPollingConnection(bot: bot))
-    try await DefaultBotHandlers.addHandlers(app: app, connection: TGBOT.connection)
-    try await TGBOT.connection.start()
+    await TGBOTCONNECTION.setConnection(try await TGLongPollingConnection(bot: bot))
+    try await DefaultBotHandlers.addHandlers(app: app, connection: TGBOTCONNECTION.connection)
+    try await TGBOTCONNECTION.connection.start()
     try routes(app)
 }
