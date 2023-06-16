@@ -4,7 +4,7 @@ import TelegramVaporBot
     import FoundationNetworking // URLSession on Linux
 #endif
 
-extension String: Error {}
+//extension String: Error {}
 
 internal func downloadPhoto(bot: TGBot, tgToken: String, photoSizes: [TGPhotoSize], maxHeightAndWidth: Int) async throws -> (Data, String) {
     guard !photoSizes.isEmpty else { throw "Empty sizes" }
