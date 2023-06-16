@@ -9,6 +9,8 @@ let package = Package(
     dependencies: [
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "4.76.0"),
+        .package(url: "https://github.com/vapor/leaf", from: "4.2.4"),
+        .package(url: "https://github.com/vapor/leaf-kit", from: "1.10.2"),
         .package(url: "https://github.com/nerzh/telegram-vapor-bot", from: "2.1.0"),
         .package(url: "https://github.com/valeriyvan/swift-geometrize.git", from: "0.9.7"),
         .package(url: "https://github.com/valeriyvan/jpeg.git", from: "1.0.2"),
@@ -20,6 +22,8 @@ let package = Package(
             name: "App",
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
+                .product(name: "Leaf", package: "leaf"),
+                .product(name: "LeafKit", package: "leaf-kit"),
                 .product(name: "TelegramVaporBot", package: "telegram-vapor-bot"),
                 .product(name: "Geometrize", package: "swift-geometrize"),
                 .product(name: "JPEG", package: "jpeg"),
