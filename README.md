@@ -6,7 +6,7 @@
 
 ![Geometrizebot logo fulltext](https://github.com/valeriyvan/geometrizebot/assets/1630974/41159708-3b2f-4d42-97bb-ca92705015d8)
 
-Geometrizebot is written in Swift Telegram bot for geometrizing images. Bot is available at https://t.me/geometrizebot. Uses Swift Package [swift-geometrize](https://github.com/valeriyvan/swift-geometrize) for geometrizing images.
+Geometrizebot is written in Swift Telegram bot for geometrizing images. Bot is available at https://t.me/geometrizebot. Experimental very limited version is [available also over web](http://139.59.148.64:8080). Bot uses Swift Package [swift-geometrize](https://github.com/valeriyvan/swift-geometrize) for geometrizing images.
 
 Here's how bot is looking at the moment:
 
