@@ -1,4 +1,5 @@
 import Vapor
+import Geometrize
 import Leaf
 
 func routes(_ app: Application) throws {
@@ -29,7 +30,8 @@ func routes(_ app: Application) throws {
             maxThumbnailSize: 64,
             originalPhotoWidth: 500,
             originalPhotoHeight: 500,
-            shapeTypes: [.rotatedEllipse],
+            shapeTypes: [RotatedEllipse.self],
+            strokeWidth: 1,
             iterations: 1,
             shapesPerIteration: 200
         )
