@@ -10,7 +10,8 @@ enum Geometrizer {
         image: Image,
         maxThumbnailSize: Int,
         originalPhotoWidth: Int, originalPhotoHeight: Int,
-        shapeTypes: Set<ShapeType>,
+        shapeTypes: [Shape.Type],
+        strokeWidth: Int,
         iterations: Int, shapesPerIteration: Int
     ) async throws -> SVGAsyncSequence {
         SVGAsyncSequence(
@@ -19,6 +20,7 @@ enum Geometrizer {
             originalPhotoWidth: originalPhotoWidth,
             originalPhotoHeight: originalPhotoHeight,
             shapeTypes: shapeTypes,
+            strokeWidth: strokeWidth,
             iterations: iterations, shapesPerIteration: shapesPerIteration
         )
     }
@@ -29,7 +31,7 @@ struct SVGIterator: AsyncIteratorProtocol {
     private let thumbnailDownsizeFactor: Int
     private let originalPhotoWidth: Int
     private let originalPhotoHeight: Int
-    private let shapeTypes: Set<ShapeType>
+    private let shapeTypes: [Shape.Type]
     private let iterations: Int
     private let shapesPerIteration: Int
 
@@ -53,7 +55,8 @@ struct SVGIterator: AsyncIteratorProtocol {
         maxThumbnailSize: Int,
         originalPhotoWidth: Int,
         originalPhotoHeight: Int,
-        shapeTypes: Set<ShapeType>,
+        shapeTypes: [Shape.Type],
+        strokeWidth: Int,
         iterations: Int,
         shapesPerIteration: Int
     ) {
@@ -79,6 +82,7 @@ struct SVGIterator: AsyncIteratorProtocol {
 
         runnerOptions = ImageRunnerOptions(
             shapeTypes: shapeTypes,
+            strokeWidth: strokeWidth,
             alpha: 128,
             shapeCount: 500,
             maxShapeMutations: 100,
@@ -109,14 +113,19 @@ struct SVGIterator: AsyncIteratorProtocol {
         var stepShapeData: [ShapeResult] = []
         while stepShapeData.count < shapesPerIteration {
             print("Step \(stepCounter)", terminator: "")
-            let shapes = runner.step(options: runnerOptions, shapeCreator: nil, energyFunction: defaultEnergyFunction, addShapePrecondition: defaultAddShapePrecondition)
-            if shapes.isEmpty {
-                print(", no shapes added.", terminator: "")
+            let stepResult = runner.step(
+                options: runnerOptions,
+                shapeCreator: nil,
+                energyFunction: defaultEnergyFunction,
+                addShapePrecondition: defaultAddShapePrecondition
+            )
+            if let stepResult {
+                print(", \(stepResult.shape.description) added.", terminator: "")
+                stepShapeData.append(stepResult)
             } else {
-                print(", \(shapes.map(\.shape).map(\.description).joined(separator: ", ")) added.", terminator: "")
+                print(", no shapes added.", terminator: "")
             }
             print(" Total count of shapes \(shapeData.count + stepShapeData.count).")
-            stepShapeData.append(contentsOf: shapes)
             stepCounter += 1
         }
 
@@ -147,7 +156,8 @@ struct SVGAsyncSequence: AsyncSequence {
     let maxThumbnailSize: Int
     let originalPhotoWidth: Int
     let originalPhotoHeight: Int
-    let shapeTypes: Set<ShapeType>
+    let shapeTypes: [Shape.Type]
+    let strokeWidth: Int
     let iterations: Int
     let shapesPerIteration: Int
 
@@ -158,6 +168,7 @@ struct SVGAsyncSequence: AsyncSequence {
             originalPhotoWidth: originalPhotoWidth,
             originalPhotoHeight: originalPhotoHeight,
             shapeTypes: shapeTypes,
+            strokeWidth: strokeWidth,
             iterations: iterations,
             shapesPerIteration: shapesPerIteration
         )

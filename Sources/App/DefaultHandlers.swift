@@ -29,7 +29,7 @@ final class DefaultBotHandlers {
     static var imageDatas: [Int64 /* userId */: GeometrizingData] = [:]
 
     // Kept between sessions to be reused by user choosing option "As last time"
-    static var shapeTypes: [Int64 /* userId */: Set<ShapeType>] = [:]
+    static var shapeTypes: [Int64 /* userId */: [Shape.Type]] = [:]
 
     // Kept between sessions to be reused by user choosing option "As last time"
     static var shapeCounts: [Int64 /* userId */: Int] = [:]
@@ -102,18 +102,18 @@ final class DefaultBotHandlers {
             .waitShapeType: { update, bot in
                 print("waitShapeType")
                 guard let message = update.message, let userId = message.from?.id, let text = message.text else { return .waitShapeType }
-                let types: Set<ShapeType>
+                let types: [Shape.Type]
                 switch text {
-                    case "Rectangles": types = [.rectangle]
-                    case "Rotated rectangles": types = [.rotatedRectangle]
-                    case "Triangles": types = [.triangle]
-                    case "Circles": types = [.circle]
-                    case "Ellipses": types = [.ellipse]
-                    case "Rotated Ellipses": types = [.rotatedEllipse]
-                    case "Lines": types = [.line]
-                    case "Polylines": types = [.polyline]
-                    case "Quadratic bezier lines": types = [.quadraticBezier]
-                    case "Surprise me!": types = Set(ShapeType.allCases)
+                    case "Rectangles": types = [Rectangle.self]
+                    case "Rotated rectangles": types = [RotatedRectangle.self]
+                    case "Triangles": types = [Triangle.self]
+                    case "Circles": types = [Circle.self]
+                    case "Ellipses": types = [Ellipse.self]
+                    case "Rotated Ellipses": types = [RotatedEllipse.self]
+                    case "Lines": types = [Line.self]
+                    case "Polylines": types = [Polyline.self]
+                    case "Quadratic bezier lines": types = [QuadraticBezier.self]
+                    case "Surprise me!": types = allShapeTypes
                     default: return .waitShapeType
                 }
                 shapeTypes[userId] = types
@@ -164,7 +164,7 @@ final class DefaultBotHandlers {
                 let params = TGSendMessageParams(
                     chatId: .chat(message.chat.id),
                     messageThreadId: nil, // TODO: ???
-                    text: "Have started geometrizing with \(shapeCount) \(types.map(\.rawValueCapitalized).joined(separator: "+"))." +
+                    text: "Have started geometrizing with \(shapeCount) \(types.map { "\(type(of: $0))".dropLast(5) /* drop .Type */ }.joined(separator: ", "))." +
                         (iterations > 1 ?
                              " Will post here \(iterations - 1) intermediary geometrizing results and then final one." :
                             ""
@@ -179,6 +179,7 @@ final class DefaultBotHandlers {
                     originalPhotoWidth: imageData.originalPhotoWidth,
                     originalPhotoHeight: imageData.originalPhotoHeight,
                     shapeTypes: types,
+                    strokeWidth: 1 /* TODO: strokeWidth*/,
                     iterations: iterations,
                     shapesPerIteration: shapesPerIteration
                 )
@@ -186,7 +187,7 @@ final class DefaultBotHandlers {
                 var iteration = 0
                 let fileNameNoExt = imageData.fileUrl.lastPathComponent.dropLast(imageData.fileUrl.pathExtension.count + 1)
                 for try await result in svgSequence {
-                    let filename = "\(fileNameNoExt)-\(shapesCounter)x\(types.map(\.rawValueCapitalized).joined(separator: "+")).svg"
+                    let filename = "\(fileNameNoExt)-\(shapesCounter)x\(shapeTypes.map { "\(type(of: $0))".dropLast(5) /* drop .Type */ }.joined(separator: ", ")).svg"
                     let svgData = result.svg.data(using: .utf8)!
                     if let s3Bucket {
                         do {
