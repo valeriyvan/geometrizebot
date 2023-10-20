@@ -20,7 +20,7 @@ func routes(_ app: Application) throws {
         case "jpg", "jpeg":
             image = .jpeg(input.file.data.getData(at: 0, length: input.file.data.writerIndex) ?? Data())
         case "png":
-            throw "Processing PNG is not implemented"
+            image = .png(input.file.data.getData(at: 0, length: input.file.data.writerIndex) ?? Data())
         default:
             throw "Cannot process file \(input.file.filename)"
         }

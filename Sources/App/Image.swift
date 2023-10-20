@@ -1,4 +1,6 @@
 import Foundation
+import JPEG
+import PNG
 
 enum Image {
     case jpeg(Data)
@@ -16,5 +18,15 @@ enum Image {
         case .jpeg: return "image/jpeg"
         case .png: return "image/x-png"
         }
+    }
+
+    func rgba() throws -> ([UInt8], width: Int, height: Int) {
+        switch self {
+        case .jpeg(let data):
+            return try JPEG.rgba(fromJPEGData: data)
+        case .png(let data):
+            return try PNG.rgba(fromPNGData: data)
+        }
+
     }
 }
