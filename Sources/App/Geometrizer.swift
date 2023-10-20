@@ -1,6 +1,7 @@
 import Foundation
 import Geometrize
 import JPEG
+import PNG
 
 enum Geometrizer {
 
@@ -65,14 +66,7 @@ struct SVGIterator: AsyncIteratorProtocol {
         self.shapeTypes = shapeTypes
         self.iterations = iterations
         self.shapesPerIteration = shapesPerIteration
-        // TODO: fix this!
-        switch image {
-        case .jpeg(let data):
-            (rgb, width, height) = try! JPEG.rgba(fromJPEGData: data)
-        case .png(let data):
-            print("Encounter PNG. This will crash!!!")
-            (rgb, width, height) = try! JPEG.rgba(fromJPEGData: data)
-        }
+        (rgb, width, height) = try! image.rgba()
         thumbnailDownsizeFactor = max(width, height) / maxThumbnailSize
         targetBitmap = Bitmap(width: width, height: height, data: rgb)
 
