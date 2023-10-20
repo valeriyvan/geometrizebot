@@ -120,6 +120,69 @@ final class DefaultBotHandlers {
                     default: return .waitShapeType
                 }
                 shapeTypes[userId] = types
+                if types.first(where: { $0 is Line.Type || $0 is Polyline.Type || $0 is QuadraticBezier.Type }) != nil {
+                    let keyboard = TGReplyKeyboardMarkup(
+                        keyboard:
+                            [[TGKeyboardButton(text: "1"),
+                              TGKeyboardButton(text: "2"),
+                              TGKeyboardButton(text: "3"),
+                              TGKeyboardButton(text: "4"),
+                              TGKeyboardButton(text: "5")
+                             ],
+                             [
+                              TGKeyboardButton(text: "6"),
+                              TGKeyboardButton(text: "7"),
+                              TGKeyboardButton(text: "8"),
+                              TGKeyboardButton(text: "9"),
+                              TGKeyboardButton(text: "10")
+                             ]
+                            ],
+                        oneTimeKeyboard: true
+                    )
+                    let params = TGSendMessageParams(
+                        chatId: .chat(message.chat.id),
+                        messageThreadId: nil, // TODO: ???
+                        text: "What's stroke width?",
+                        replyToMessageId: message.messageId,
+                        replyMarkup: .replyKeyboardMarkup(keyboard)
+                    )
+                    try await bot.sendMessage(params: params)
+                    return .waitStrokeWidth
+                } else {
+                    let keyboard = TGReplyKeyboardMarkup(
+                        keyboard:
+                            // Number should divide on 5 without remainder as .waitShapeCount step rely on that
+                        [[TGKeyboardButton(text: "50"),
+                          TGKeyboardButton(text: "100"),
+                          TGKeyboardButton(text: "150")
+                         ],
+                         [TGKeyboardButton(text: "200"),
+                          TGKeyboardButton(text: "250"),
+                          TGKeyboardButton(text: "500")
+                         ],
+                         [TGKeyboardButton(text: "1000"),
+                          TGKeyboardButton(text: "5000"),
+                          TGKeyboardButton(text: "10000")
+                         ]
+                        ],
+                        oneTimeKeyboard: true
+                    )
+                    let params = TGSendMessageParams(
+                        chatId: .chat(message.chat.id),
+                        messageThreadId: nil, // TODO: ???
+                        text: "How many shapes?",
+                        replyToMessageId: message.messageId,
+                        replyMarkup: .replyKeyboardMarkup(keyboard)
+                    )
+                    try await bot.sendMessage(params: params)
+                    return .waitShapeCount
+                }
+            },
+
+            .waitStrokeWidth: { update, bot in
+                print("waitStrokeWidth")
+                guard let message = update.message, let userId = message.from?.id, let strokeWidth = message.text.flatMap(Int.init), strokeWidth > 0 && strokeWidth <= 10 else { return .waitStrokeWidth }
+                strokeWidths[userId] = strokeWidth
                 let keyboard = TGReplyKeyboardMarkup(
                     keyboard:
                         // Number should divide on 5 without remainder as .waitShapeCount step rely on that
@@ -152,15 +215,15 @@ final class DefaultBotHandlers {
             .waitShapeCount: { update, bot in
                 guard let message = update.message, let userId = message.from?.id, let shapeCount = message.text.flatMap(Int.init), shapeCount > 0 && shapeCount <= 10000 else { return .waitShapeCount }
                 shapeCounts[userId] = shapeCount
-                guard let imageData = imageDatas[userId], let types = shapeTypes[userId], let shapeCount = shapeCounts[userId]  else {
+                guard let imageData = imageDatas[userId], let types = shapeTypes[userId], let strokeWidth = strokeWidths[userId], let shapeCount = shapeCounts[userId]  else {
                     throw "Internal inconsistency"
                 }
 
                 let shapesPerIteration: Int
                 switch shapeCount {
-                case ...100: shapesPerIteration = shapeCount
-                case 101...200: shapesPerIteration = shapeCount / 2
-                default: shapesPerIteration = shapeCount / 5
+                    case ...100: shapesPerIteration = shapeCount
+                    case 101...200: shapesPerIteration = shapeCount / 2
+                    default: shapesPerIteration = shapeCount / 5
                 }
                 let iterations = shapeCount / shapesPerIteration
 
@@ -182,7 +245,7 @@ final class DefaultBotHandlers {
                     originalPhotoWidth: imageData.originalPhotoWidth,
                     originalPhotoHeight: imageData.originalPhotoHeight,
                     shapeTypes: types,
-                    strokeWidth: 1 /* TODO: strokeWidth*/,
+                    strokeWidth: strokeWidth,
                     iterations: iterations,
                     shapesPerIteration: shapesPerIteration
                 )
