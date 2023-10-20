@@ -7,7 +7,6 @@ final class DefaultBotHandlers {
 
     static func addHandlers(app: Vapor.Application, connection: TGConnectionPrtcl) async throws {
         try await messageHandler(app: app, connection: connection)
-        await commandPingHandler(app: app, connection: connection)
         await commandHelpHandler(app: app, connection: connection)
         await commandStartHandler(app: app, connection: connection)
     }
@@ -23,6 +22,7 @@ final class DefaultBotHandlers {
     enum DialogState {
         case waitImageFromUser
         case waitShapeType
+        case waitStrokeWidth
         case waitShapeCount
     }
 
@@ -30,6 +30,9 @@ final class DefaultBotHandlers {
 
     // Kept between sessions to be reused by user choosing option "As last time"
     static var shapeTypes: [Int64 /* userId */: [Shape.Type]] = [:]
+
+    // Kept between sessions to be reused by user choosing option "As last time"
+    static var strokeWidths: [Int64 /* userId */: Int] = [:]
 
     // Kept between sessions to be reused by user choosing option "As last time"
     static var shapeCounts: [Int64 /* userId */: Int] = [:]
@@ -237,13 +240,6 @@ final class DefaultBotHandlers {
         await connection.dispatcher.add(handler)
     }
 
-    private static func commandPingHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
-        let handler = TGCommandHandler(commands: ["/ping"]) { update, bot in
-            try await update.message?.reply(text: "pong", bot: bot)
-        }
-        await connection.dispatcher.add(handler)
-    }
-
     private static func commandHelpHandler(app: Vapor.Application, connection: TGConnectionPrtcl) async {
         let handler = TGCommandHandler(commands: ["/help"]) { update, bot in
             try await update.message?.reply(
@@ -251,8 +247,6 @@ final class DefaultBotHandlers {
                     Bot for geometrizing images.
                     /start
                         for starting bot,
-                    /ping
-                        sends ping message to bot,
                     /help
                         prints this message.
                     """,
