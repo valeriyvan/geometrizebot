@@ -230,7 +230,7 @@ final class DefaultBotHandlers {
                 let params = TGSendMessageParams(
                     chatId: .chat(message.chat.id),
                     messageThreadId: nil, // TODO: ???
-                    text: "Have started geometrizing with \(shapeCount) \(types.map { "\(type(of: $0))".dropLast(5) /* drop .Type */ }.joined(separator: ", "))." +
+                    text: "Have started geometrizing with \(shapeCount) \(types.map { "\(type(of: $0))".dropLast(5) /* drop .Type */ }.joined(separator: "-"))." +
                         (iterations > 1 ?
                              " Will post here \(iterations - 1) intermediary geometrizing results and then final one." :
                             ""
@@ -253,7 +253,8 @@ final class DefaultBotHandlers {
                 var iteration = 0
                 let fileNameNoExt = imageData.fileUrl.lastPathComponent.dropLast(imageData.fileUrl.pathExtension.count + 1)
                 for try await result in svgSequence {
-                    let filename = "\(fileNameNoExt)-\(shapesCounter)x\(shapeTypes.map { "\(type(of: $0))".dropLast(5) /* drop .Type */ }.joined(separator: ", ")).svg"
+                    let filename = "\(fileNameNoExt)-\(shapesCounter)x\(types.map { "\(type(of: $0))".dropLast(5) /* drop .Type */ }.joined(separator: "-")).svg"
+                    print(filename)
                     let svgData = result.svg.data(using: .utf8)!
                     if let s3Bucket {
                         do {
