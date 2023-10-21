@@ -213,9 +213,10 @@ final class DefaultBotHandlers {
             },
 
             .waitShapeCount: { update, bot in
+                print("waitShapeCount")
                 guard let message = update.message, let userId = message.from?.id, let shapeCount = message.text.flatMap(Int.init), shapeCount > 0 && shapeCount <= 10000 else { return .waitShapeCount }
                 shapeCounts[userId] = shapeCount
-                guard let imageData = imageDatas[userId], let types = shapeTypes[userId], let strokeWidth = strokeWidths[userId], let shapeCount = shapeCounts[userId]  else {
+                guard let imageData = imageDatas[userId], let types = shapeTypes[userId], let shapeCount = shapeCounts[userId]  else {
                     throw "Internal inconsistency"
                 }
 
@@ -245,7 +246,7 @@ final class DefaultBotHandlers {
                     originalPhotoWidth: imageData.originalPhotoWidth,
                     originalPhotoHeight: imageData.originalPhotoHeight,
                     shapeTypes: types,
-                    strokeWidth: strokeWidth,
+                    strokeWidth: strokeWidths[userId] ?? 1,
                     iterations: iterations,
                     shapesPerIteration: shapesPerIteration
                 )
