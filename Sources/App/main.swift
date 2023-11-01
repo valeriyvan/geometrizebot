@@ -36,6 +36,7 @@ let app: Application = Application(
     env,
     Application.EventLoopGroupProvider.shared(eventLoopGroup)
 )
+app.logger.logLevel = .trace
 let TGBOTCONNECTION: TGBotConnection = TGBotConnection()
 
 defer { app.shutdown() }
