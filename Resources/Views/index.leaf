@@ -10,6 +10,25 @@
 
     <form action="/upload" method="post" enctype="multipart/form-data">
         <input type="file" name="file"><br><br>
+        How would you like your image to be geometrized?<br>
+        <input type="radio" id="rectangles" name="shape" value="Rectangle">
+        <label for="rectangles">Rectangles</label><br>
+        <input type="radio" id="rotated rectangles" name="shape" value="Rotated Rectangle">
+        <label for="rotated rectangles">Rotated Rectangles</label><br>
+        <input type="radio" id="triangles" name="shape" value="Triangle">
+        <label for="triangles">Triangles</label><br>
+        <input type="radio" id="circles" name="shape" value="Circle">
+        <label for="circles">Circles</label><br>
+        <input type="radio" id="ellipses" name="shape" value="Ellipse">
+        <label for="ellipses">Ellipses</label><br>
+        <input type="radio" id="rotated ellipses" name="shape" value="Rotated Ellipse"  checked="checked">
+        <label for="rotated ellipses">Rotated Ellipses</label><br>
+        <input type="radio" id="lines" name="shape" value="Line">
+        <label for="lines">Lines</label><br>
+        <input type="radio" id="polylines" name="shape" value="Polyline">
+        <label for="Polylines">Polylines</label><br>
+        <input type="radio" id="quadratic bezier" name="shape" value="Quadratic Bezier">
+        <label for="quadratic bezier">Quadratic Bezier</label><br><br>
         <input type="submit" value="Submit for geometrizing">
     </form>
   </body>
