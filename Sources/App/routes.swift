@@ -9,9 +9,15 @@ func routes(_ app: Application) throws {
 
     app.post("upload") { req async throws -> View in
         struct Input: Content {
+            var shape: String
             var file: File
         }
-        let input = try req.content.decode(Input.self)
+        let input: Input = try req.content.decode(Input.self)
+
+        let selectedShapeName = input.shape
+        let allShapeTypeStrings = allShapeTypes.map { String("\(type(of: $0))".dropLast(5)) } // /* drop .Type */
+        let selectedShapeIndex = allShapeTypeStrings.firstIndex(of: selectedShapeName)
+        let selectedShape = selectedShapeIndex.flatMap({ allShapeTypes[$0] }) ?? RotatedEllipse.self
 
         let path = app.directory.publicDirectory + input.file.filename
 
@@ -30,7 +36,7 @@ func routes(_ app: Application) throws {
             maxThumbnailSize: 64,
             originalPhotoWidth: 500,
             originalPhotoHeight: 500,
-            shapeTypes: [RotatedEllipse.self],
+            shapeTypes: [selectedShape],
             strokeWidth: 1,
             iterations: 1,
             shapesPerIteration: 200
