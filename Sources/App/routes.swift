@@ -14,10 +14,7 @@ func routes(_ app: Application) throws {
         }
         let input: Input = try req.content.decode(Input.self)
 
-        let selectedShapeName = input.shape
-        let allShapeTypeStrings = allShapeTypes.map { String("\(type(of: $0))".dropLast(5)) } // /* drop .Type */
-        let selectedShapeIndex = allShapeTypeStrings.firstIndex(of: selectedShapeName)
-        let selectedShape = selectedShapeIndex.flatMap({ allShapeTypes[$0] }) ?? RotatedEllipse.self
+        let selectedShape = shapeType(from: input.shape.replacingOccurrences(of: " ", with: "")) ?? RotatedEllipse.self
 
         let path = app.directory.publicDirectory + input.file.filename
 
@@ -58,4 +55,12 @@ func routes(_ app: Application) throws {
         )
     }
 
+}
+
+// TODO: remove on next swift-geometrize update
+func shapeType(from string: String) -> Shape.Type? {
+    allShapeTypes
+        .map { String("\(type(of: $0))".dropLast(5) /* drop .Type */) }
+        .firstIndex(of: string)
+        .flatMap { allShapeTypes[$0] }
 }
