@@ -1,0 +1,48 @@
+.file-drop-area {
+    position: relative;
+    padding: 2rem 1rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    border: 2px dashed #dae1e7;
+    background-color: #fff;
+    text-align: center;
+    cursor: pointer;
+}
+.file-drop-area .file-drop-icon {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: #aeb4be;
+    font-size: 1.625rem;
+}
+.file-drop-area .file-drop-message {
+    display: block;
+    font-size: .875rem;
+    margin-bottom: 1.25rem;
+}
+.file-drop-area .file-drop-input {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    opacity: 0;
+    outline: none;
+    cursor: pointer;
+    z-index: 2;
+}
+.file-drop-area .btn {
+    position: relative;
+    z-index: 3;
+}
+.file-drop-area .file-drop-preview {
+    max-width: 16rem;
+    margin-right: auto;
+    margin-bottom: 0.75rem;
+    margin-left: auto;
+}
+img, figure {
+    max-width: 100%;
+    height: auto;
+    vertical-align: middle;
+}

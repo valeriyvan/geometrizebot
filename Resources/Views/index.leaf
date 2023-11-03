@@ -1,11 +1,156 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Drag and Drop with preview image in vanilla javascript by AppleRinquest.com</title>
+    <!-- add our custom style -->
+    <link rel="stylesheet" href="style.css">
+    <!-- using Bootstrap framework -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- using Font awesome framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>Geometrizing images</title>
   </head>
   <body>
+    <!--
+        NOTE:
+        The code based can use for the multiple uploaded image inputs.
+        Each uploaded image input will have its own preview image card.
+        In this code,
+
+        We refer the elements by classname in Javascript. We don't use the element Id.
+    -->
+
+    <!-- Title -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="mt-5"></div>
+                <h3 class="h5 text-center text-secondary text-uppercase">Creating a drag and drop uploader with preview in Javascript</h3>
+                <a href="http://applerinquest.com" class="d-block text-center text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square"></i> Apple Rinquest - WordPress/PHP developer</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ### .preview-image-container | START ### -->
+    <div class="container preview-image-container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mt-5"></div>
+                <h2 class="h5 mb-2 pb-1">Upload file</h2>
+                <p class="mb-4 fs-sm">File types supported: PNG, JPEG, JPG. Max size: 1mb.</p>
+
+                <!-- invalid message -->
+                <div class="invalid-feedback invalidFileSize" style="display:none;">The maximum file is 1mb. Please reduce the file size or change the new file.</div>
+                <div class="invalid-feedback invalidFileType" style="display:none;">Only PNG, JPEG and JPG file type are acceptable. Please choose the new file type.</div>
+
+                <!-- Drag and drop file upload -->
+                <div class="file-drop-area">
+                    <div class="file-drop-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <span class="file-drop-message">Drag and drop here to upload</span>
+                    <input type="file" class="file-drop-input" accept=".png, .jpg, .jpeg">
+                    <button type="button" class="file-drop-btn btn btn-primary btn-sm">Or select file</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm remove-upload-btn">Remove</button>
+                </div>
+
+                <!-- Note -->
+                <div class="mt-5 text-muted">
+                    <span><b>In this tutorial</b>, we want the users to view the uploaded image on the card design before saving.</span>
+                </div>
+
+            </div>
+
+            <!-- preview image section -->
+            <aside class="col-md-6 mt-0 text-center">
+                <div class="mt-5"></div>
+
+                <!-- preview image card -->
+                <div class="card border-0 shadow bg-light d-inline-block" style="width: 400px; height: 600px; pointer-events: none; border-radius: 50px;">
+                    <div class="d-flex align-items-end justify-content-start w-100 h-100">
+
+                        <!-- preview image -->
+                        <img src="" alt="" class="position-absolute top-0 preview-image" style="display: none; border-radius: 50px; width: 400px; height: 600px; object-fit: cover;">
+
+                        <!-- extra info -->
+                        <div class="d-flex justify-content-between align-items-center mb-3 mx-5 mt-5 position-relative" style="z-index:100;">
+                            <div class="d-inline-block w-50">
+                                <span class="text-white bg-info bg-gradient rounded-pill p-2 preview-image-title"><i class="fa-solid fa-location-dot"></i>&nbsp;&nbsp;Krabi,Thailand</span>
+                            </div>
+                            <div class="d-inline-block text-end w-50">
+                                <img src="img/person-dummy.jpg" alt="https://www.freepik.com/drobotdean" class="rounded-circle w-50 border border-info border-3">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+    </div>
+    <!-- ### .preview-image-container | END ### -->
+
+    <div class="my-5 border-1 border"></div>
+
+    <!-- ### .preview-image-container | START ### -->
+    <div class="container preview-image-container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mt-5"></div>
+                <h2 class="h5 mb-2 pb-1">Upload file</h2>
+                <p class="mb-4 fs-sm">File types supported: PNG, JPEG, JPG. Max size: 1mb.</p>
+
+                <!-- invalid message -->
+                <div class="invalid-feedback invalidFileSize" style="display:none;">The maximum file is 1mb. Please reduce the file size or change the new file.</div>
+                <div class="invalid-feedback invalidFileType" style="display:none;">Only PNG, JPEG and JPG file type are acceptable. Please choose the new file type.</div>
+
+                <!-- Drag and drop file upload -->
+                <div class="file-drop-area">
+                    <div class="file-drop-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <span class="file-drop-message">Drag and drop here to upload</span>
+                    <input type="file" class="file-drop-input" accept=".png, .jpg, .jpeg">
+                    <button type="button" class="file-drop-btn btn btn-primary btn-sm">Or select file</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm remove-upload-btn">Remove</button>
+                </div>
+
+                <!-- Note -->
+                <div class="mt-5 text-muted">
+                    <span><b>In this tutorial</b>, we want the users to view the uploaded image on the card design before saving.</span>
+                </div>
+
+            </div>
+
+            <!-- preview image section -->
+            <aside class="col-md-6 mt-0 text-center">
+                <div class="mt-5"></div>
+
+                <!-- preview image card -->
+                <div class="card border-0 shadow bg-light d-inline-block" style="width: 400px; height: 600px; pointer-events: none; border-radius: 50px;">
+                    <div class="d-flex align-items-end justify-content-start w-100 h-100">
+
+                        <!-- preview image -->
+                        <img src="" alt="" class="position-absolute top-0 preview-image" style="display: none; border-radius: 50px; width: 400px; height: 600px; object-fit: cover;">
+
+                        <!-- extra info -->
+                        <div class="d-flex justify-content-between align-items-center mb-3 mx-5 mt-5 position-relative" style="z-index:100;">
+                            <div class="d-inline-block w-50">
+                                <span class="text-white bg-info bg-gradient rounded-pill p-2 preview-image-title"><i class="fa-solid fa-location-dot"></i>&nbsp;&nbsp;Krabi,Thailand</span>
+                            </div>
+                            <div class="d-inline-block text-end w-50">
+                                <img src="img/person-dummy.jpg" alt="https://www.freepik.com/drobotdean" class="rounded-circle w-50 border border-info border-3">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+    </div>
+    <!-- ### .preview-image-container | END ### -->
+
+    <!-- add our custom js -->
+    <script src="file-drag-drop.js"></script>
+
     <h1>Upload image to geometrize it</h1>
 
     <form action="/upload" method="post" enctype="multipart/form-data">
