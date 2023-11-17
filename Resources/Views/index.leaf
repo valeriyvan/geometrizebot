@@ -14,22 +14,13 @@
     <title>Geometrizing images</title>
   </head>
   <body>
-    <!--
-        NOTE:
-        The code based can use for the multiple uploaded image inputs.
-        Each uploaded image input will have its own preview image card.
-        In this code,
-
-        We refer the elements by classname in Javascript. We don't use the element Id.
-    -->
-
     <!-- Title -->
     <div class="container">
         <div class="row">
             <div class="col-12">
                 <div class="mt-5"></div>
-                <h3 class="h5 text-center text-secondary text-uppercase">Creating a drag and drop uploader with preview in Javascript</h3>
-                <a href="http://applerinquest.com" class="d-block text-center text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square"></i> Apple Rinquest - WordPress/PHP developer</a>
+                <h3 class="h5 text-center text-secondary text-uppercase">Geometrize image - recreate images with geometric primitives</h3>
+                <a href="https://github.com/valeriyvan/swift-geometrize" class="d-block text-center text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square"></i> GitHub</a>
             </div>
         </div>
     </div>
@@ -40,7 +31,7 @@
             <div class="col-md-6">
                 <div class="mt-5"></div>
                 <h2 class="h5 mb-2 pb-1">Upload file</h2>
-                <p class="mb-4 fs-sm">File types supported: PNG, JPEG, JPG. Max size: 1mb.</p>
+                <p class="mb-4 fs-sm">File types supported: PNG, JPEG, JPG. Max size: 10mb.</p>
 
                 <!-- invalid message -->
                 <div class="invalid-feedback invalidFileSize" style="display:none;">The maximum file is 1mb. Please reduce the file size or change the new file.</div>
@@ -50,41 +41,34 @@
                 <div class="file-drop-area">
                     <div class="file-drop-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                     <span class="file-drop-message">Drag and drop here to upload</span>
-                    <input type="file" class="file-drop-input" accept=".png, .jpg, .jpeg">
-                    <button type="button" class="file-drop-btn btn btn-primary btn-sm">Or select file</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm remove-upload-btn">Remove</button>
+                    <form action="/upload" method="post" enctype="multipart/form-data" name="upload-form">
+                        <input type="file" class="file-drop-input" accept=".png, .jpg, .jpeg" name="file">
+                        <button type="button" class="file-drop-btn btn btn-primary btn-sm">Or select file</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm remove-upload-btn">Remove</button><br><br>
                 </div>
-
-                <!-- Note -->
-                <div class="mt-5 text-muted">
-                    <span><b>In this tutorial</b>, we want the users to view the uploaded image on the card design before saving.</span>
-                </div>
-
+                        <br>
+                        How would you like your image to be geometrized?<br>
+                        <input type="radio" id="rectangles" name="shape" value="Rectangle">
+                        <label for="rectangles">Rectangles</label><br>
+                        <input type="radio" id="rotated rectangles" name="shape" value="Rotated Rectangle">
+                        <label for="rotated rectangles">Rotated Rectangles</label><br>
+                        <input type="radio" id="triangles" name="shape" value="Triangle">
+                        <label for="triangles">Triangles</label><br>
+                        <input type="radio" id="circles" name="shape" value="Circle">
+                        <label for="circles">Circles</label><br>
+                        <input type="radio" id="ellipses" name="shape" value="Ellipse">
+                        <label for="ellipses">Ellipses</label><br>
+                        <input type="radio" id="rotated ellipses" name="shape" value="Rotated Ellipse"  checked="checked">
+                        <label for="rotated ellipses">Rotated Ellipses</label><br>
+                        <input type="radio" id="lines" name="shape" value="Line">
+                        <label for="lines">Lines</label><br>
+                        <input type="radio" id="polylines" name="shape" value="Polyline">
+                        <label for="Polylines">Polylines</label><br>
+                        <input type="radio" id="quadratic bezier" name="shape" value="Quadratic Bezier">
+                        <label for="quadratic bezier">Quadratic Bezier</label><br><br>
+                        <input type="submit" value="Submit for geometrizing">
+                    </form>
             </div>
-
-            <!-- preview image section -->
-            <aside class="col-md-6 mt-0 text-center">
-                <div class="mt-5"></div>
-
-                <!-- preview image card -->
-                <div class="card border-0 shadow bg-light d-inline-block" style="width: 400px; height: 600px; pointer-events: none; border-radius: 50px;">
-                    <div class="d-flex align-items-end justify-content-start w-100 h-100">
-
-                        <!-- preview image -->
-                        <img src="" alt="" class="position-absolute top-0 preview-image" style="display: none; border-radius: 50px; width: 400px; height: 600px; object-fit: cover;">
-
-                        <!-- extra info -->
-                        <div class="d-flex justify-content-between align-items-center mb-3 mx-5 mt-5 position-relative" style="z-index:100;">
-                            <div class="d-inline-block w-50">
-                                <span class="text-white bg-info bg-gradient rounded-pill p-2 preview-image-title"><i class="fa-solid fa-location-dot"></i>&nbsp;&nbsp;Krabi,Thailand</span>
-                            </div>
-                            <div class="d-inline-block text-end w-50">
-                                <img src="img/person-dummy.jpg" alt="https://www.freepik.com/drobotdean" class="rounded-circle w-50 border border-info border-3">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </aside>
         </div>
 
     </div>
@@ -94,31 +78,7 @@
 
     <!-- add our custom js -->
     <script src="file-drag-drop.js"></script>
+    <script src="performAJAXCall.js"></script>
 
-    <h1>Upload image to geometrize it</h1>
-
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file"><br><br>
-        How would you like your image to be geometrized?<br>
-        <input type="radio" id="rectangles" name="shape" value="Rectangle">
-        <label for="rectangles">Rectangles</label><br>
-        <input type="radio" id="rotated rectangles" name="shape" value="Rotated Rectangle">
-        <label for="rotated rectangles">Rotated Rectangles</label><br>
-        <input type="radio" id="triangles" name="shape" value="Triangle">
-        <label for="triangles">Triangles</label><br>
-        <input type="radio" id="circles" name="shape" value="Circle">
-        <label for="circles">Circles</label><br>
-        <input type="radio" id="ellipses" name="shape" value="Ellipse">
-        <label for="ellipses">Ellipses</label><br>
-        <input type="radio" id="rotated ellipses" name="shape" value="Rotated Ellipse"  checked="checked">
-        <label for="rotated ellipses">Rotated Ellipses</label><br>
-        <input type="radio" id="lines" name="shape" value="Line">
-        <label for="lines">Lines</label><br>
-        <input type="radio" id="polylines" name="shape" value="Polyline">
-        <label for="Polylines">Polylines</label><br>
-        <input type="radio" id="quadratic bezier" name="shape" value="Quadratic Bezier">
-        <label for="quadratic bezier">Quadratic Bezier</label><br><br>
-        <input type="submit" value="Submit for geometrizing">
-    </form>
   </body>
 </html>
