@@ -60,6 +60,7 @@ var fileDropArea = function () {
                             icon.className = 'file-drop-preview img-thumbnail rounded';
                             icon.innerHTML = '<img src="' + image.src + '" alt="' + fileName + '">';
                         };
+
                         // # Note: You can add the video and document file type using this code below as well.
                         // On the preview section, you must add your own custom code to make it work as you want.
                         // } else if (fileData.startsWith('data:video')) {
@@ -84,8 +85,8 @@ var fileDropArea = function () {
             } else if (input.files[0]) {
                 let file = input.files[0];
 
-                // Check filesize is over 1 mb(1000000 bytes)
-                if (file.size > 1000000) {
+                // Check filesize is over 10 mb(10000000 bytes)
+                if (file.size > 10000000) {
                     // show a warning message
                     invalidFileSize.style.display = "block";
 
