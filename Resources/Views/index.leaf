@@ -41,11 +41,19 @@
                 <div class="file-drop-area">
                     <div class="file-drop-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                     <span class="file-drop-message">Drag and drop here to upload</span>
-                    <form action="/upload" method="post" enctype="multipart/form-data" name="upload-form">
+                        <!-- Add the activity indicator div with inline styles -->
+                        <div class="activity-indicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
+                            <svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="75" cy="75" r="60" stroke="#3498db" stroke-width="6" fill="none" stroke-dasharray="180" stroke-dashoffset="120">
+                                    <animate attributeName="stroke-dashoffset" dur="1.5s" values="0;540" keyTimes="0;1" repeatCount="indefinite" />
+                                </circle>
+                            </svg>
+                        </div>
+                    <form enctype="multipart/form-data" name="upload-form" id="upload-form">
                         <input type="file" class="file-drop-input" accept=".png, .jpg, .jpeg" name="file">
                         <button type="button" class="file-drop-btn btn btn-primary btn-sm">Or select file</button>
                         <button type="button" class="btn btn-outline-secondary btn-sm remove-upload-btn">Remove</button><br><br>
-                </div>
+                </div> <!-- shape radio button -->
                         <br>
                         How would you like your image to be geometrized?<br>
                         <input type="radio" id="rectangles" name="shape" value="Rectangle">
@@ -68,17 +76,16 @@
                         <label for="quadratic bezier">Quadratic Bezier</label><br><br>
                         <input type="submit" value="Submit for geometrizing">
                     </form>
-            </div>
-        </div>
-
+                </div> <!-- Shape radio button -->
+                </div> <!-- Drag and drop file upload -->
+            </div> <!-- col-md-6 -->
+        </div> <!-- row -->
     </div>
     <!-- ### .preview-image-container | END ### -->
 
     <div class="my-5 border-1 border"></div>
 
-    <!-- add our custom js -->
     <script src="file-drag-drop.js"></script>
-    <script src="performAJAXCall.js"></script>
 
   </body>
 </html>

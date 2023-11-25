@@ -7,7 +7,7 @@ func routes(_ app: Application) throws {
         req.leaf.render("index")
     }
 
-    app.post("upload") { req async throws -> View in
+    app.post("ajax") { req async throws in
         struct Input: Content {
             var shape: String
             var file: File
@@ -45,14 +45,7 @@ func routes(_ app: Application) throws {
         let results = try await svgSequence.reduce(into: [GeometrizingResult]()) { $0.append($1) }
         let svgLines = results.last!.svg.components(separatedBy: .newlines)
         let svg = svgLines.dropFirst(2).joined(separator: "\n")
-        return try await req.view.render(
-           "result",
-           [
-                "fileUrl": "fileName.svg",
-                "svg": svg,
-                "isImage": "true"
-            ]
-        )
+        return svg
     }
 
 }
