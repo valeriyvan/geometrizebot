@@ -19,6 +19,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="mt-5"></div>
+                <center><img src="/img/Geometrize logo fulltext.svg" width="400"></center>
                 <h3 class="h5 text-center text-secondary text-uppercase">Geometrize image - recreate images with geometric primitives</h3>
                 <a href="https://github.com/valeriyvan/swift-geometrize" class="d-block text-center text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square"></i> GitHub</a>
             </div>
