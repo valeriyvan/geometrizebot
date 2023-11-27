@@ -29,7 +29,7 @@
     <!-- ### .preview-image-container | START ### -->
     <div class="container preview-image-container">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6" style="margin: auto;">
                 <div class="mt-5"></div>
                 <h2 class="h5 mb-2 pb-1">Upload file</h2>
                 <p class="mb-4 fs-sm">File types supported: PNG, JPEG, JPG. Max size: 10mb.</p>
