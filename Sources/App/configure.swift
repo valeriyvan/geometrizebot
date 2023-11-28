@@ -6,6 +6,17 @@ public func configure(_ app: Application) async throws {
     app.http.server.configuration.hostname = tgHostname
     app.http.server.configuration.port = tgPort
 
+    app.http.server.configuration.responseCompression = .enabled
+
+    // Enable TLS.
+    // For this configuration to compile you need to add import NIOSSL at the top
+    // of your configuration file. You also might need to add NIOSSL as a dependency
+    // in your Package.swift file.
+    //app.http.server.configuration.tlsConfiguration = .forServer(
+    //    certificateChain: NIOSSLCertificate.fromPEMFile("/path/to/cert.pem").map { .certificate($0) },
+    //    privateKey: .file("/path/to/key.pem")
+    //)
+
     app.routes.defaultMaxBodySize = "10mb"
 
     // Serves files from `Public/` directory
