@@ -12,6 +12,7 @@ var fileDropArea = function () {
             removeButton = dropArea[i].querySelector('.remove-upload-btn'),
             invalidFileSize = previewContainer[i].querySelector('.invalidFileSize'),
             invalidFileType = previewContainer[i].querySelector('.invalidFileType');
+            submitFormButton = previewContainer[i].querySelector('.submit-form-button');
 
         message.innerHTML = "Drag and drop here to upload";
 
@@ -37,6 +38,9 @@ var fileDropArea = function () {
                 const originIcon = document.createElement("i");
                 originIcon.className = "fa-solid fa-cloud-arrow-up";
                 icon.appendChild(originIcon);
+
+                // disable submit button
+                submitFormButton.disabled = true;
             }
 
         });
@@ -59,6 +63,7 @@ var fileDropArea = function () {
                             // CSS is already added in the style script
                             icon.className = 'file-drop-preview img-thumbnail rounded';
                             icon.innerHTML = '<img src="' + image.src + '" alt="' + fileName + '">';
+                            submitFormButton.disabled = false;
                         };
                     }
                 };
