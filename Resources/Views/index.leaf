@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Drag and Drop with preview image in vanilla javascript by AppleRinquest.com</title>
+    <title>Geometrize image - recreate images with geometric primitives</title>
     <!-- add our custom style -->
     <link rel="stylesheet" href="style.css">
     <!-- using Bootstrap framework -->
