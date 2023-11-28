@@ -10,11 +10,17 @@ func routes(_ app: Application) throws {
     app.post("ajax") { req async throws in
         struct Input: Content {
             var shape: String
+            var count: String
             var file: File
         }
         let input: Input = try req.content.decode(Input.self)
 
         let selectedShape = shapeType(from: input.shape.replacingOccurrences(of: " ", with: "")) ?? RotatedEllipse.self
+
+        let shapeCount = Int(input.count)
+        guard let shapeCount else {
+            throw "Invalid shape count \(input.count)"
+        }
 
         let path = app.directory.publicDirectory + input.file.filename
 
@@ -36,10 +42,8 @@ func routes(_ app: Application) throws {
             shapeTypes: [selectedShape],
             strokeWidth: 1,
             iterations: 1,
-            shapesPerIteration: 200
+            shapesPerIteration: shapeCount
         )
-        var shapesCounter = 200 // shapesPerIteration
-        var iteration = 0
         let fileNameNoExt = URL(fileURLWithPath: input.file.filename).lastPathComponent.dropLast(URL(fileURLWithPath: input.file.filename).pathExtension.count + 1)
 
         let results = try await svgSequence.reduce(into: [GeometrizingResult]()) { $0.append($1) }

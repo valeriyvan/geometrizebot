@@ -73,7 +73,20 @@
                         <input type="radio" id="polylines" name="shape" value="Polyline">
                         <label for="Polylines">Polylines</label><br>
                         <input type="radio" id="quadratic bezier" name="shape" value="Quadratic Bezier">
-                        <label for="quadratic bezier">Quadratic Bezier</label><br><br>
+                        <label for="quadratic bezier">Quadratic Bezier</label><br>
+                        <br>
+                        How many shapes?<br>
+                        <select name="count">
+                            <option>50</option>
+                            <option>100</option>
+                            <option>250</option>
+                            <option selected>500</option>
+                            <option>1000</option>
+                            <option>5000</option>
+                            <option>10000</option>
+                        </select>
+                        <br>
+                        <br>
                         <input type="submit" value="Submit for geometrizing">
                     </form>
                 </div> <!-- Shape radio button -->
