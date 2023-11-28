@@ -87,7 +87,7 @@
                         </select>
                         <br>
                         <br>
-                        <input type="submit" value="Submit for geometrizing">
+                        <input type="submit"  class="submit-form-button" value="Submit for geometrizing" disabled>
                     </form>
                 </div> <!-- Shape radio button -->
                 </div> <!-- Drag and drop file upload -->
