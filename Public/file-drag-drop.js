@@ -1,3 +1,5 @@
+var generatedSvg = "";
+
 // https://applerinquest.com/how-to-preview-the-uploaded-image-in-javascript/
 var fileDropArea = function () {
     var dropArea = document.querySelectorAll('.file-drop-area');
@@ -10,8 +12,9 @@ var fileDropArea = function () {
             icon = dropArea[i].querySelector('.file-drop-icon'),
             selectButton = dropArea[i].querySelector('.file-drop-btn'),
             removeButton = dropArea[i].querySelector('.remove-upload-btn'),
+            downloadSvgButton = dropArea[i].querySelector('.download-svg-btn'),
             invalidFileSize = previewContainer[i].querySelector('.invalidFileSize'),
-            invalidFileType = previewContainer[i].querySelector('.invalidFileType');
+            invalidFileType = previewContainer[i].querySelector('.invalidFileType'),
             submitFormButton = previewContainer[i].querySelector('.submit-form-button');
 
         message.innerHTML = "Drag and drop here to upload";
@@ -39,6 +42,9 @@ var fileDropArea = function () {
                 originIcon.className = "fa-solid fa-cloud-arrow-up";
                 icon.appendChild(originIcon);
 
+                // remove download SVG button
+                downloadSvgButton.style.display = 'none';
+
                 // disable submit button
                 submitFormButton.disabled = true;
             }
@@ -64,6 +70,7 @@ var fileDropArea = function () {
                             icon.className = 'file-drop-preview img-thumbnail rounded';
                             icon.innerHTML = '<img src="' + image.src + '" alt="' + fileName + '">';
                             submitFormButton.disabled = false;
+                            downloadSvgButton.style.display = 'none';
                         };
                     }
                 };
@@ -108,15 +115,15 @@ var fileDropArea = function () {
         uploadInput.addEventListener('change', function () {
             const [file] = uploadInput.files;
 
-            if (file && ((file.type == "image/jpeg") || (file.type == "image/png"))) {
-                previewImageElement.style.display = 'block';
-                previewImageElement.src = URL.createObjectURL(file)
-            }
+            //if (file && ((file.type == "image/jpeg") || (file.type == "image/png"))) {
+            //    previewImageElement.style.display = 'block';
+            //    previewImageElement.src = URL.createObjectURL(file)
+            //}
         });
 
         // # remove preview image
         previewContainer[i].querySelector('.remove-upload-btn').addEventListener('click', function () {
-            previewImageElement.src = '';
+            //previewImageElement.src = '';
             previewImageElement.style.display = 'none';
 
         });
@@ -155,6 +162,7 @@ function submitForm(event) {
         document.querySelector('.activity-indicator').style.display = "none";
         selectButton.disabled = false;
         removeButton.disabled = false;
+        document.querySelector('.download-svg-btn').style.display = "inline";
         Array.from(uploadForm.elements).forEach(formElement => formElement.disabled = false);
         if (!response.ok) {
             throw new Error('network returns error');
@@ -164,14 +172,33 @@ function submitForm(event) {
     .then((resp) => {
         var elements = document.getElementsByClassName('file-drop-preview img-thumbnail rounded')
         var img = '<img src="' + 'data:image/svg+xml;base64,' + Base64.encode(resp) + '" alt="' + "fileName.svg" + '">';
-        //console.log(img);
         elements[0].innerHTML = img;
+        generatedSvg = resp;
     })
     .catch((error) => {
         // Handle error
         console.log("error ", error);
     });
 }
+
+// https://zwbetz.com/create-a-text-file-in-memory-then-download-it-on-button-click-with-vanilla-js/
+const download = (filename, contents, mimeType = "image/svg+xml") => {
+    const blob = new Blob([contents], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = filename
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+}
+
+const handleDownload = () => {
+    const filename = "file.svg"
+    const contents = generatedSvg;
+    download(filename, contents)
+}
+//
 
 var uploadForm = document.getElementById("upload-form");
 uploadForm.addEventListener("submit", submitForm);

@@ -52,7 +52,8 @@
                     <form enctype="multipart/form-data" name="upload-form" id="upload-form">
                         <input type="file" class="file-drop-input" accept=".png, .jpg, .jpeg" name="file">
                         <button type="button" class="file-drop-btn btn btn-primary btn-sm">Or select file</button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm remove-upload-btn">Remove</button><br><br>
+                        <button type="button" class="btn btn-outline-secondary btn-sm remove-upload-btn">Remove</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm download-svg-btn" onclick = "handleDownload()" style="display: none;"> Download SVG </button><br><br>
                 </div> <!-- shape radio button -->
                         <br>
                         How would you like your image to be geometrized?<br>
@@ -87,7 +88,7 @@
                         </select>
                         <br>
                         <br>
-                        <input type="submit"  class="submit-form-button" value="Submit for geometrizing" disabled>
+                        <input type="submit" class="submit-form-button" value="Submit for geometrizing" disabled>
                     </form>
                 </div> <!-- Shape radio button -->
                 </div> <!-- Drag and drop file upload -->
