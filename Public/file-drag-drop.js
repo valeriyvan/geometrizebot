@@ -145,6 +145,7 @@ function submitForm(event) {
     var formData = new FormData(uploadForm);
 
     var dropArea = document.querySelector('.file-drop-area');
+    dropArea.scrollIntoView({behavior: 'smooth'});
     selectButton = dropArea.querySelector('.file-drop-btn'),
     selectButton.disabled = true;
     removeButton = dropArea.querySelector('.remove-upload-btn'),
