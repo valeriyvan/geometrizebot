@@ -36,9 +36,6 @@ func routes(_ app: Application) throws {
 
         let svgSequence = try await Geometrizer.geometrize(
             image: image,
-            maxThumbnailSize: 64,
-            originalPhotoWidth: 500,
-            originalPhotoHeight: 500,
             shapeTypes: [selectedShape],
             strokeWidth: 1,
             iterations: 1,

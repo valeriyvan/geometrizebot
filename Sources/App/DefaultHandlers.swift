@@ -242,9 +242,6 @@ final class DefaultBotHandlers {
 
                 let svgSequence = try await Geometrizer.geometrize(
                     image: imageData.image,
-                    maxThumbnailSize: 64,
-                    originalPhotoWidth: imageData.originalPhotoWidth,
-                    originalPhotoHeight: imageData.originalPhotoHeight,
                     shapeTypes: types,
                     strokeWidth: strokeWidths[userId] ?? 1,
                     iterations: iterations,
