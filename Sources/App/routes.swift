@@ -2,12 +2,19 @@ import Vapor
 import Geometrize
 import Leaf
 
+var cache: [String: SVGIterator] = [:]
+
 func routes(_ app: Application) throws {
     app.get { req in
         req.leaf.render("index")
     }
 
-    app.post("ajax") { req async throws in
+    app.post("geometrize", "start", ":id", ":steps") { req async throws in
+        guard let id: String = req.parameters.get("id"),
+              let steps: Int = req.parameters.get("steps").flatMap(Int.init) else {
+            throw "Inconsistent request"
+        }
+
         struct Input: Content {
             var shape: String
             var count: String
@@ -34,21 +41,39 @@ func routes(_ app: Application) throws {
             throw "Cannot process file \(input.file.filename)"
         }
 
-        let svgSequence = try await Geometrizer.geometrize(
+        let svgSequence: SVGAsyncSequence = try await Geometrizer.geometrize(
             image: image,
             shapeTypes: [selectedShape],
             strokeWidth: 1,
-            iterations: 1,
-            shapesPerIteration: shapeCount
+            iterations: steps,
+            shapesPerIteration: shapeCount / steps
         )
-        let fileNameNoExt = URL(fileURLWithPath: input.file.filename).lastPathComponent.dropLast(URL(fileURLWithPath: input.file.filename).pathExtension.count + 1)
-
-        let results = try await svgSequence.reduce(into: [GeometrizingResult]()) { $0.append($1) }
-        let svgLines = results.last!.svg.components(separatedBy: .newlines)
+        var asyncIterator = svgSequence.makeAsyncIterator()
+        cache[id] = asyncIterator
+        guard let result = try await asyncIterator.next() else {
+            throw "No next element"
+        }
+        let svgLines = result.svg.components(separatedBy: .newlines)
         let svg = svgLines.dropFirst(2).joined(separator: "\n")
         return svg
     }
 
+    app.get("geometrize", "continue", ":id") { req async throws in
+        guard let id: String = req.parameters.get("id") else {
+            throw "Inconsistent request"
+        }
+        guard var asyncIterator = cache[id] else {
+            throw "Internal inconsistency"
+        }
+        guard let result = try await asyncIterator.next() else {
+            throw "No next element"
+        }
+        cache[id] = asyncIterator
+        let svgLines = result.svg.components(separatedBy: .newlines)
+        let svg = svgLines.dropFirst(2).joined(separator: "\n")
+        //print(svg)
+        return svg
+    }
 }
 
 // TODO: remove on next swift-geometrize update

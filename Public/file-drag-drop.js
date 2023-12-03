@@ -124,7 +124,7 @@ var fileDropArea = function () {
         // # remove preview image
         previewContainer[i].querySelector('.remove-upload-btn').addEventListener('click', function () {
             //previewImageElement.src = '';
-            previewImageElement.style.display = 'none';
+            //previewImageElement.style.display = 'none';
 
         });
     }
@@ -138,33 +138,16 @@ var fileDropArea = function () {
 // https://stackoverflow.com/a/26514148/942513
 var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9\+\/\=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/\r\n/g,"\n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
 
-// https://html.form.guide/action/form-action-call-javascript-function/
-function submitForm(event) {
-    event.preventDefault();
-    var uploadForm = document.getElementById("upload-form");
-    var formData = new FormData(uploadForm);
+// https://stackoverflow.com/a/75855405/942513
+var guid = () => { var w = () => { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); }
+  return  `${w()}${w()}-${w()}-${w()}-${w()}-${w()}${w()}${w()}`;}
 
-    var dropArea = document.querySelector('.file-drop-area');
-    dropArea.scrollIntoView({behavior: 'smooth'});
-    selectButton = dropArea.querySelector('.file-drop-btn'),
-    selectButton.disabled = true;
-    removeButton = dropArea.querySelector('.remove-upload-btn'),
-    removeButton.disabled = true;
-    document.querySelector('.activity-indicator').style.display = "block";
-
-    // https://stackoverflow.com/a/61546525/942513
-    Array.from(uploadForm.elements).forEach(formElement => formElement.disabled = true);
-
-    fetch("/ajax", {
-        method: "POST",
-        body: formData,
+async function fetchPost(uuid, formData) {
+    await fetch("/geometrize/start/" + uuid + "/10", {
+    method: "POST",
+    body: formData,
     })
     .then(response => {
-        document.querySelector('.activity-indicator').style.display = "none";
-        selectButton.disabled = false;
-        removeButton.disabled = false;
-        document.querySelector('.download-svg-btn').style.display = "inline";
-        Array.from(uploadForm.elements).forEach(formElement => formElement.disabled = false);
         if (!response.ok) {
             throw new Error('network returns error');
         }
@@ -180,6 +163,58 @@ function submitForm(event) {
         // Handle error
         console.log("error ", error);
     });
+}
+
+async function fetchGet(uuid) {
+    await fetch("/geometrize/continue/" + uuid, {
+    method: "GET",
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('network returns error');
+        }
+        return response.text();
+    })
+    .then((resp) => {
+        var elements = document.getElementsByClassName('file-drop-preview img-thumbnail rounded')
+        var img = '<img src="' + 'data:image/svg+xml;base64,' + Base64.encode(resp) + '" alt="' + "fileName.svg" + '">';
+        console.log(elements);
+        elements[0].innerHTML = img;
+        generatedSvg = resp;
+    })
+    .catch((error) => {
+        // Handle error
+        console.log("error ", error);
+    });
+}
+
+// https://html.form.guide/action/form-action-call-javascript-function/
+async function submitForm(event) {
+    event.preventDefault();
+    var uploadForm = document.getElementById("upload-form");
+    var formData = new FormData(uploadForm);
+
+    var dropArea = document.querySelector('.file-drop-area');
+    dropArea.scrollIntoView({behavior: 'smooth'});
+    selectButton = dropArea.querySelector('.file-drop-btn'),
+    selectButton.disabled = true;
+    removeButton = dropArea.querySelector('.remove-upload-btn'),
+    removeButton.disabled = true;
+    document.querySelector('.activity-indicator').style.display = "block";
+
+    // https://stackoverflow.com/a/61546525/942513
+    Array.from(uploadForm.elements).forEach(formElement => formElement.disabled = true);
+
+    const uuid = guid();
+    await fetchPost(uuid, formData);
+    for (let i = 0; i < 9; i++) {
+        await fetchGet(uuid);
+    }
+    document.querySelector('.activity-indicator').style.display = "none";
+    selectButton.disabled = false;
+    removeButton.disabled = false;
+    document.querySelector('.download-svg-btn').style.display = "inline";
+    Array.from(uploadForm.elements).forEach(formElement => formElement.disabled = false);
 }
 
 // https://zwbetz.com/create-a-text-file-in-memory-then-download-it-on-button-click-with-vanilla-js/
