@@ -205,16 +205,57 @@ async function submitForm(event) {
     // https://stackoverflow.com/a/61546525/942513
     Array.from(uploadForm.elements).forEach(formElement => formElement.disabled = true);
 
-    const uuid = guid();
-    await fetchPost(uuid, formData);
-    for (let i = 0; i < 9; i++) {
-        await fetchGet(uuid);
-    }
-    document.querySelector('.activity-indicator').style.display = "none";
-    selectButton.disabled = false;
-    removeButton.disabled = false;
-    document.querySelector('.download-svg-btn').style.display = "inline";
-    Array.from(uploadForm.elements).forEach(formElement => formElement.disabled = false);
+    var uuid = ""
+    await fetch("/geometrize/ws/", {
+    method: "POST",
+    body: formData,
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('network returns error');
+        }
+        return response.text();
+    })
+    .then((resp) => {
+        uuid = resp;
+    })
+    .catch((error) => {
+        // Handle error
+        console.log("error ", error);
+    });
+
+    let socket = new WebSocket(uuid);
+
+    socket.onopen = function(e) {
+        //alert("Connection established");
+    };
+
+    socket.onmessage = function(event) {
+        console.log("onmessage");
+        var elements = document.getElementsByClassName('file-drop-preview img-thumbnail rounded')
+        var img = '<img src="' + 'data:image/svg+xml;base64,' + Base64.encode(event.data) + '" alt="' + "fileName.svg" + '">';
+        console.log(elements);
+        elements[0].innerHTML = img;
+        generatedSvg = event.data;
+    };
+
+    socket.onclose = function(event) {
+        console.log("onclose");
+        if (!event.wasClean) {
+            // e.g. server process killed or network down
+            // event.code is usually 1006 in this case
+            alert("Connection died");
+        }
+        document.querySelector('.activity-indicator').style.display = "none";
+        selectButton.disabled = false;
+        removeButton.disabled = false;
+        document.querySelector('.download-svg-btn').style.display = "inline";
+        Array.from(uploadForm.elements).forEach(formElement => formElement.disabled = false);
+    };
+
+    socket.onerror = function(error) {
+      alert(`[error]`);
+    };
 }
 
 // https://zwbetz.com/create-a-text-file-in-memory-then-download-it-on-button-click-with-vanilla-js/
