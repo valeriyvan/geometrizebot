@@ -41,7 +41,7 @@
     margin-bottom: 0.75rem;
     margin-left: auto;
 }
-img, figure {
+img, figure, svg {
     max-width: 100%;
     height: auto;
     vertical-align: middle;
