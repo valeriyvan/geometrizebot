@@ -231,11 +231,9 @@ async function submitForm(event) {
     };
 
     socket.onmessage = function(event) {
-        console.log("onmessage");
         var elements = document.getElementsByClassName('file-drop-preview img-thumbnail rounded')
-        var img = '<img src="' + 'data:image/svg+xml;base64,' + Base64.encode(event.data) + '" alt="' + "fileName.svg" + '">';
-        console.log(elements);
-        elements[0].innerHTML = img;
+        //var img = '<img src="' + 'data:image/svg+xml;base64,' + Base64.encode(event.data) + '" alt="' + "fileName.svg" + '">';
+        elements[0].innerHTML = event.data;
         generatedSvg = event.data;
     };
 
