@@ -21,6 +21,38 @@ extension Bitmap {
         return Data(destinationStream.data)
     }
 
+    // Transposes Bitmap
+    mutating func transpose() {
+        self = Bitmap(width: height, height: width) {
+            self[$1, $0]
+        }
+    }
+
+    mutating func swap(x1: Int, y1: Int, x2: Int, y2: Int) {
+        let copy = self[x1, y1]
+        self[x1, y1] = self[x2, y2]
+        self[x2, y2] = copy
+    }
+
+    // Reflects Bitmap vertically
+    mutating func reflectVertically() {
+        for x in 0 ..< width / 2 {
+            for y in 0 ..< height {
+                swap(x1: x, y1: y, x2: width - x - 1, y2: y)
+            }
+        }
+    }
+
+    // Reflects Bitmap horizontally
+    mutating func reflectHorizontally() {
+        for x in 0 ..< width {
+            for y in 0 ..< height / 2 {
+                swap(x1: x, y1: y, x2: x, y2: height - y - 1)
+            }
+        }
+    }
+
+
 }
 
 private struct DestinationStream: PNG.Bytestream.Destination {

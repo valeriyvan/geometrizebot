@@ -8,14 +8,14 @@ enum Geometrizer {
     // Returns SVGAsyncSequence which produces intermediate geometrizing results
     // which are SVG strings + thumbnails. The last sequence element is final result.
     static func geometrize(
-        image: Image,
+        bitmap: Bitmap,
         shapeTypes: [Shape.Type],
         strokeWidth: Int,
         iterations: Int,
         shapesPerIteration: Int
     ) async throws -> SVGAsyncSequence {
         SVGAsyncSequence(
-            image: image,
+            bitmap: bitmap,
             shapeTypes: shapeTypes,
             strokeWidth: strokeWidth,
             iterations: iterations,
@@ -32,7 +32,6 @@ struct SVGIterator: AsyncIteratorProtocol {
     private let iterations: Int
     private let shapesPerIteration: Int
 
-    private let rgb: [UInt8]
     private let width, height: Int
 
     private var iterationCounter: Int
@@ -45,10 +44,8 @@ struct SVGIterator: AsyncIteratorProtocol {
     // Counts attempts to add shapes. Not all attempts to add shape result in adding a shape.
     private var stepCounter: Int
 
-    let targetBitmap: Bitmap
-
     init(
-        image: Image,
+        bitmap: Bitmap,
         downscaleImageToMaxSize downscaleSize: Int = 500,
         shapeTypes: [Shape.Type],
         strokeWidth: Int,
@@ -58,14 +55,17 @@ struct SVGIterator: AsyncIteratorProtocol {
         self.shapeTypes = shapeTypes
         self.iterations = iterations
         self.shapesPerIteration = shapesPerIteration
-        (rgb, originalPhotoWidth, originalPhotoHeight) = try! image.rgba()
 
+        var targetBitmap = bitmap
+        originalPhotoWidth = bitmap.width
+        originalPhotoHeight = bitmap.height
         let maxSize = max(originalPhotoWidth, originalPhotoHeight)
         if maxSize > downscaleSize {
-            targetBitmap = Bitmap(width: originalPhotoWidth, height: originalPhotoHeight, data: rgb).downsample(factor: maxSize / downscaleSize)
-        } else {
-            targetBitmap = Bitmap(width: originalPhotoWidth, height: originalPhotoHeight, data: rgb)
+            targetBitmap = bitmap.downsample(factor: maxSize / downscaleSize)
         }
+
+        //targetBitmap.transpose()
+        //targetBitmap.reflectVertically()
 
         width = targetBitmap.width
         height = targetBitmap.height
@@ -80,7 +80,7 @@ struct SVGIterator: AsyncIteratorProtocol {
             alpha: 128,
             shapeCount: 500, // ?
             maxShapeMutations: 100,
-            seed: 9001,
+            seed: 9001, // !
             maxThreads: 1,
             shapeBounds: ImageRunnerShapeBoundsOptions(
                 enabled: false,
@@ -146,7 +146,7 @@ struct GeometrizingResult {
 struct SVGAsyncSequence: AsyncSequence {
     typealias Element = GeometrizingResult
 
-    let image: Image
+    let bitmap: Bitmap
     let shapeTypes: [Shape.Type]
     let strokeWidth: Int
     let iterations: Int
@@ -154,7 +154,7 @@ struct SVGAsyncSequence: AsyncSequence {
 
     func makeAsyncIterator() -> SVGIterator {
         SVGIterator(
-            image: image,
+            bitmap: bitmap,
             shapeTypes: shapeTypes,
             strokeWidth: strokeWidth,
             iterations: iterations,

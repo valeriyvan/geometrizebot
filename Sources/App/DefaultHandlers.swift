@@ -13,7 +13,7 @@ final class DefaultBotHandlers {
 
     struct GeometrizingData {
         let messageId: Int
-        let image: Image
+        let bitmap: Bitmap
         let fileUrl: URL
         let originalPhotoWidth: Int
         let originalPhotoHeight: Int
@@ -57,19 +57,19 @@ final class DefaultBotHandlers {
                         print(error)
                     }
                 }
-                let image: Image
+                let bitmap: Bitmap
                 switch URL(fileURLWithPath: filePath).pathExtension.lowercased() {
                 case "jpg", "jpeg":
-                    image = .jpeg(photoData)
+                    bitmap = try Bitmap(jpeg: photoData)
                 case "png":
-                    throw "Processing PNG is not implemented"
+                    bitmap = try Bitmap(png: photoData)
                 default:
                     throw "Cannot process file \(filePath)"
                 }
                 let (originalPhotoWidth, originalPhotoHeight) = photoSizes.map { ($0.width, $0.height) }.max { $0.0 < $1.0 }!
                 imageDatas[userId] = GeometrizingData(
                     messageId: message.messageId,
-                    image: image,
+                    bitmap: bitmap,
                     fileUrl: URL(fileURLWithPath: filePath),
                     originalPhotoWidth: originalPhotoWidth,
                     originalPhotoHeight: originalPhotoHeight
@@ -241,7 +241,7 @@ final class DefaultBotHandlers {
                 try await bot.sendMessage(params: params)
 
                 let svgSequence = try await Geometrizer.geometrize(
-                    image: imageData.image,
+                    bitmap: imageData.bitmap,
                     shapeTypes: types,
                     strokeWidth: strokeWidths[userId] ?? 1,
                     iterations: iterations,

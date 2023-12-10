@@ -2,19 +2,18 @@ import Foundation
 import PNG
 import struct Geometrize.Bitmap
 
-extension PNG {
-
-    static func rgba(fromPNGData data: Foundation.Data) throws -> ([UInt8], width: Int, height: Int) {
+extension Bitmap {
+    init(png data: Data) throws {
         var bytestreamSource = DataBytestreamSource(data: data)
         guard let image: PNG.Data.Rectangular = try .decompress(stream: &bytestreamSource) else {
             throw "Cannot decompress PNG data"
         }
         let rgb: [PNG.RGBA<UInt8>] = image.unpack(as: PNG.RGBA<UInt8>.self)
         let (width, height) = image.size
-        let data: [UInt8] = rgb.flatMap({ [$0.r, $0.g, $0.b, $0.a] })
-        return (data, width, height)
+        let rgba: [UInt8] = rgb.flatMap({ [$0.r, $0.g, $0.b, $0.a] })
+        let bitmap = Bitmap(width: width, height: height, data: rgba)
+        self = bitmap
     }
-
 }
 
 private struct DataBytestreamSource: _PNGBytestreamSource {

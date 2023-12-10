@@ -31,20 +31,21 @@ func routes(_ app: Application) throws {
             throw "Invalid shape count \(input.count)"
         }
 
-        let path = app.directory.publicDirectory + input.file.filename
-
-        let image: Image
+        guard let data = input.file.data.getData(at: 0, length: input.file.data.writerIndex) else {
+            throw "Cannot process file \(input.file.filename)"
+        }
+        let bitmap: Bitmap
         switch URL(fileURLWithPath: input.file.filename).pathExtension.lowercased() {
         case "jpg", "jpeg":
-            image = .jpeg(input.file.data.getData(at: 0, length: input.file.data.writerIndex) ?? Data())
+            bitmap = try Bitmap(jpeg: data)
         case "png":
-            image = .png(input.file.data.getData(at: 0, length: input.file.data.writerIndex) ?? Data())
+            bitmap = try Bitmap(png: data)
         default:
             throw "Cannot process file \(input.file.filename)"
         }
 
         let svgSequence: SVGAsyncSequence = try await Geometrizer.geometrize(
-            image: image,
+            bitmap: bitmap,
             shapeTypes: [selectedShape],
             strokeWidth: 1,
             iterations: steps,
@@ -91,26 +92,27 @@ func routes(_ app: Application) throws {
             throw "Invalid shape count \(input.count)"
         }
 
-        let path = app.directory.publicDirectory + input.file.filename
-
-        let image: Image
+        guard let data = input.file.data.getData(at: 0, length: input.file.data.writerIndex) else {
+            throw "Cannot process file \(input.file.filename)"
+        }
+        let bitmap: Bitmap
         switch URL(fileURLWithPath: input.file.filename).pathExtension.lowercased() {
         case "jpg", "jpeg":
-            image = .jpeg(input.file.data.getData(at: 0, length: input.file.data.writerIndex) ?? Data())
+            bitmap = try Bitmap(jpeg: data)
         case "png":
-            image = .png(input.file.data.getData(at: 0, length: input.file.data.writerIndex) ?? Data())
+            bitmap = try Bitmap(png: data)
         default:
             throw "Cannot process file \(input.file.filename)"
         }
 
         let svgSequence: SVGAsyncSequence = try await Geometrizer.geometrize(
-            image: image,
+            bitmap: bitmap,
             shapeTypes: [selectedShape],
             strokeWidth: 1,
             iterations: shapeCount,
             shapesPerIteration: 1
         )
-        var asyncIterator = svgSequence.makeAsyncIterator()
+        let asyncIterator = svgSequence.makeAsyncIterator()
         let uuid = UUID()
         iterators[uuid] = (date: Date(), iterator: asyncIterator)
         return uuid.uuidString
