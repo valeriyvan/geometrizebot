@@ -1,4 +1,5 @@
 import Vapor
+import NIOSSL
 import Leaf
 import TelegramVaporBot
 
@@ -9,13 +10,12 @@ public func configure(_ app: Application) async throws {
     app.http.server.configuration.responseCompression = .enabled
 
     // Enable TLS.
-    // For this configuration to compile you need to add import NIOSSL at the top
-    // of your configuration file. You also might need to add NIOSSL as a dependency
-    // in your Package.swift file.
-    //app.http.server.configuration.tlsConfiguration = .forServer(
-    //    certificateChain: NIOSSLCertificate.fromPEMFile("/path/to/cert.pem").map { .certificate($0) },
-    //    privateKey: .file("/path/to/key.pem")
-    //)
+    let certPEM = tgCertPEM.utf8CString.map(UInt8.init(bitPattern:))
+    let keyPEM = tgKeyPEM.utf8CString.map(UInt8.init(bitPattern:))
+    app.http.server.configuration.tlsConfiguration = .makeServerConfiguration(
+        certificateChain: try NIOSSLCertificate.fromPEMBytes(certPEM).map { .certificate($0) },
+        privateKey: .privateKey(try NIOSSLPrivateKey(bytes: keyPEM, format: .pem))
+    )
 
     app.routes.defaultMaxBodySize = "10mb"
 
@@ -26,7 +26,7 @@ public func configure(_ app: Application) async throws {
     // LeafRenderer.Option.caching = .bypass
     app.views.use(.leaf)
 
-    /// set level of debug if you needed
+    // set level of debug if you needed
     TGBot.log.logLevel = app.logger.logLevel
     let bot: TGBot = .init(app: app, botId: tgToken)
     await TGBOTCONNECTION.setConnection(try await TGLongPollingConnection(bot: bot))
