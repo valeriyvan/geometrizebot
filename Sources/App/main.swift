@@ -7,6 +7,10 @@ let tgHostname = ProcessInfo.processInfo.environment["geometrizebot_hostname"] ?
 
 let tgPort: Int = ProcessInfo.processInfo.environment["geometrizebot_port"].flatMap(Int.init) ?? 80
 
+let tgCertPEM: String = ProcessInfo.processInfo.environment["geometrizebot_cert_pem"] ?? "NO_CERT_PEM"
+
+let tgKeyPEM: String = ProcessInfo.processInfo.environment["geometrizebot_key_pem"] ?? "NO_KEY_PEM"
+
 // nil s3Bucket means no debug upload of source images
 let s3Bucket: String? = ProcessInfo.processInfo.environment["debug_upload_images_into_s3_bucket"]
 
