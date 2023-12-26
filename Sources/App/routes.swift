@@ -2,16 +2,19 @@ import Vapor
 import Geometrize
 import Leaf
 
-var cache: [String: SVGIterator] = [:]
+var cache: [String: (date: Date, iterator: SVGIterator)] = [:]
 
 var iterators: [UUID: (date: Date, iterator: SVGIterator)] = [:]
 
 func routes(_ app: Application) throws {
     app.get { req in
-        req.leaf.render("index")
+        cleanup()
+        return req.leaf.render("index")
     }
 
     app.post("geometrize", "start", ":id", ":steps") { req async throws in
+        cleanup()
+
         guard let id: String = req.parameters.get("id"),
               let steps: Int = req.parameters.get("steps").flatMap(Int.init) else {
             throw "Inconsistent request"
@@ -52,7 +55,7 @@ func routes(_ app: Application) throws {
             shapesPerIteration: shapeCount / steps
         )
         var asyncIterator = svgSequence.makeAsyncIterator()
-        cache[id] = asyncIterator
+        cache[id] = (date: Date(), iterator: asyncIterator)
         guard let result = try await asyncIterator.next() else {
             throw "No next element"
         }
@@ -62,22 +65,26 @@ func routes(_ app: Application) throws {
     }
 
     app.get("geometrize", "continue", ":id") { req async throws in
+        cleanup()
+
         guard let id: String = req.parameters.get("id") else {
             throw "Inconsistent request"
         }
-        guard var asyncIterator = cache[id] else {
+        guard var asyncIterator = cache[id]?.iterator else {
             throw "Internal inconsistency"
         }
         guard let result = try await asyncIterator.next() else {
             throw "No next element"
         }
-        cache[id] = asyncIterator
+        cache[id] = (date: Date(), iterator: asyncIterator)
         let svgLines = result.svg.components(separatedBy: .newlines)
         let svg = svgLines.dropFirst(2).joined(separator: "\n")
         return svg
     }
 
     app.post("geometrize", "ws") { req async throws in
+        cleanup()
+
         struct Input: Content {
             var shape: String // TODO: shapes
             var count: String
@@ -119,6 +126,8 @@ func routes(_ app: Application) throws {
     }
 
     app.webSocket(":uuid") { req, ws async in // throws ???
+        cleanup()
+
         guard let uuidString = req.parameters.get("uuid"),
             let uuid = UUID(uuidString: uuidString),
             var (_, iterator) = iterators[uuid]
@@ -133,6 +142,13 @@ func routes(_ app: Application) throws {
         }
         try? await ws.close()
     }
+}
+
+private func cleanup() {
+    let cleanupInterval: TimeInterval = 60.0 * 60.0
+    let now = Date()
+    cache = cache.filter { now.timeIntervalSince($0.value.date) < cleanupInterval }
+    iterators = iterators.filter { now.timeIntervalSince($0.value.date) < cleanupInterval }
 }
 
 // TODO: remove on next swift-geometrize update
