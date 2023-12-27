@@ -1,4 +1,5 @@
 var generatedSvg = "";
+var originalFilename = "";
 
 // https://applerinquest.com/how-to-preview-the-uploaded-image-in-javascript/
 var fileDropArea = function () {
@@ -58,8 +59,8 @@ var fileDropArea = function () {
 
                 reader.onload = function (e) {
                     var fileData = e.target.result;
-                    var fileName = input.files[0].name;
-                    message.innerHTML = fileName;
+                    originalFilename = input.files[0].name;
+                    message.innerHTML = originalFilename;
 
                     if (fileData.startsWith('data:image')) {
                         var image = new Image();
@@ -68,7 +69,7 @@ var fileDropArea = function () {
                         image.onload = function () {
                             // CSS is already added in the style script
                             icon.className = 'file-drop-preview img-thumbnail rounded';
-                            icon.innerHTML = '<img src="' + image.src + '" alt="' + fileName + '">';
+                            icon.innerHTML = '<img src="' + image.src + '" alt="' + originalFilename + '">';
                             submitFormButton.disabled = false;
                             downloadSvgButton.style.display = 'none';
                         };
@@ -269,9 +270,8 @@ const download = (filename, contents, mimeType = "image/svg+xml") => {
 }
 
 const handleDownload = () => {
-    const filename = "file.svg"
     const contents = generatedSvg;
-    download(filename, contents)
+    download(originalFilename + ".svg", contents)
 }
 //
 
