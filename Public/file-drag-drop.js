@@ -257,6 +257,20 @@ async function submitForm(event) {
     };
 }
 
+// https://stackoverflow.com/questions/4250364/how-to-trim-a-file-extension-from-a-string-in-javascript
+const splitNameAndExtension = (fileName) => {
+  const dotIndex = fileName.lastIndexOf(".");
+
+  if (dotIndex === -1) {
+    return { name: fileName, extension: "" };
+  }
+
+  const name = fileName.substring(0, dotIndex);
+  const extension = fileName.substring(dotIndex + 1);
+
+  return { name, extension };
+};
+
 // https://zwbetz.com/create-a-text-file-in-memory-then-download-it-on-button-click-with-vanilla-js/
 const download = (filename, contents, mimeType = "image/svg+xml") => {
     const blob = new Blob([contents], { type: mimeType })
@@ -271,7 +285,7 @@ const download = (filename, contents, mimeType = "image/svg+xml") => {
 
 const handleDownload = () => {
     const contents = generatedSvg;
-    download(originalFilename + ".svg", contents)
+    download(splitNameAndExtension(originalFilename).name + ".svg", contents)
 }
 //
 
