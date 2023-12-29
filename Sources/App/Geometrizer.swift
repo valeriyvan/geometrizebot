@@ -62,9 +62,6 @@ struct SVGIterator: AsyncIteratorProtocol {
             targetBitmap = bitmap.downsample(factor: maxSize / downscaleSize)
         }
 
-        //targetBitmap.transpose()
-        //targetBitmap.reflectVertically()
-
         width = targetBitmap.width
         height = targetBitmap.height
 
