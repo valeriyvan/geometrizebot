@@ -1,7 +1,5 @@
 import Foundation
 import Geometrize
-import JPEG
-import PNG
 
 enum Geometrizer {
 
