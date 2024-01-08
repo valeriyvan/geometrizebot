@@ -240,12 +240,13 @@ final class DefaultBotHandlers {
                 )
                 try await bot.sendMessage(params: params)
 
-                let svgSequence = try await Geometrizer.geometrize(
+                let svgSequence = try await SVGAsyncGeometrizer.geometrize(
                     bitmap: imageData.bitmap,
                     shapeTypes: types,
                     strokeWidth: strokeWidths[userId] ?? 1,
                     iterations: iterations,
-                    shapesPerIteration: shapesPerIteration
+                    shapesPerIteration: shapesPerIteration, 
+                    iterationOptions: .completeSVGEachIteration
                 )
                 var shapesCounter = shapesPerIteration
                 var iteration = 0

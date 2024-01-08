@@ -146,11 +146,11 @@
     },
     {
       "identity" : "swift-geometrize",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/valeriyvan/swift-geometrize.git",
+      "kind" : "localSourceControl",
+      "location" : "/Users/valeriyvan/Documents/geometrize/swift-geometrize",
       "state" : {
-        "revision" : "cf4f10093672b88b787e110d4a94f2a8c7a3ad62",
-        "version" : "1.1.2"
+        "branch" : "feature/asynciterator",
+        "revision" : "c82b7e104ce6ed94f55530a6ef1351ae4ad23ab9"
       }
     },
     {

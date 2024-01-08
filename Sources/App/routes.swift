@@ -2,9 +2,9 @@ import Vapor
 import Geometrize
 import Leaf
 
-var cache: [String: (date: Date, iterator: SVGIterator)] = [:]
+var cache: [String: (date: Date, iterator: SVGAsyncIterator)] = [:]
 
-var iterators: [UUID: (date: Date, iterator: SVGIterator)] = [:]
+var iterators: [UUID: (date: Date, iterator: SVGAsyncIterator)] = [:]
 
 func routes(_ app: Application) throws {
     app.get { req in
@@ -47,12 +47,13 @@ func routes(_ app: Application) throws {
             throw "Cannot process file \(input.file.filename)"
         }
 
-        let svgSequence: SVGAsyncSequence = try await Geometrizer.geometrize(
+        let svgSequence: SVGAsyncSequence = try await SVGAsyncGeometrizer.geometrize(
             bitmap: bitmap,
             shapeTypes: [selectedShape],
             strokeWidth: 1,
             iterations: steps,
-            shapesPerIteration: shapeCount / steps
+            shapesPerIteration: shapeCount / steps, 
+            iterationOptions: .completeSVGEachIteration
         )
         var asyncIterator = svgSequence.makeAsyncIterator()
         cache[id] = (date: Date(), iterator: asyncIterator)
@@ -112,12 +113,13 @@ func routes(_ app: Application) throws {
             throw "Cannot process file \(input.file.filename)"
         }
 
-        let svgSequence: SVGAsyncSequence = try await Geometrizer.geometrize(
+        let svgSequence: SVGAsyncSequence = try await SVGAsyncGeometrizer.geometrize(
             bitmap: bitmap,
             shapeTypes: [selectedShape],
             strokeWidth: 1,
             iterations: shapeCount,
-            shapesPerIteration: 1
+            shapesPerIteration: 1,
+            iterationOptions: .completeSVGEachIteration
         )
         let asyncIterator = svgSequence.makeAsyncIterator()
         let uuid = UUID()
