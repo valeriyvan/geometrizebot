@@ -95,7 +95,7 @@ final class DefaultBotHandlers {
                     chatId: .chat(message.chat.id),
                     messageThreadId: nil, // TODO: ???
                     text: "How would you like your image to be geometrized?",
-                    replyToMessageId: message.messageId,
+                    replyParameters: TGReplyParameters(messageId: message.messageId),
                     replyMarkup: .replyKeyboardMarkup(keyboard)
                 )
                 try await bot.sendMessage(params: params)
@@ -143,7 +143,7 @@ final class DefaultBotHandlers {
                         chatId: .chat(message.chat.id),
                         messageThreadId: nil, // TODO: ???
                         text: "What's stroke width?",
-                        replyToMessageId: message.messageId,
+                        replyParameters: TGReplyParameters(messageId: message.messageId),
                         replyMarkup: .replyKeyboardMarkup(keyboard)
                     )
                     try await bot.sendMessage(params: params)
@@ -171,7 +171,7 @@ final class DefaultBotHandlers {
                         chatId: .chat(message.chat.id),
                         messageThreadId: nil, // TODO: ???
                         text: "How many shapes?",
-                        replyToMessageId: message.messageId,
+                        replyParameters: TGReplyParameters(messageId: message.messageId),
                         replyMarkup: .replyKeyboardMarkup(keyboard)
                     )
                     try await bot.sendMessage(params: params)
@@ -205,7 +205,7 @@ final class DefaultBotHandlers {
                     chatId: .chat(message.chat.id),
                     messageThreadId: nil, // TODO: ???
                     text: "How many shapes?",
-                    replyToMessageId: message.messageId,
+                    replyParameters: TGReplyParameters(messageId: message.messageId),
                     replyMarkup: .replyKeyboardMarkup(keyboard)
                 )
                 try await bot.sendMessage(params: params)
@@ -236,7 +236,7 @@ final class DefaultBotHandlers {
                              " Will post here \(iterations - 1) intermediary geometrizing results and then final one." :
                             ""
                         ),
-                    replyToMessageId: message.messageId
+                    replyParameters: TGReplyParameters(messageId: message.messageId)
                 )
                 try await bot.sendMessage(params: params)
 
@@ -279,7 +279,7 @@ final class DefaultBotHandlers {
                             document: .file(file),
                             thumbnail: .file(thumbnail),
                             caption: iterations > 1 ? "\(iteration + 1)/\(iterations)" : nil,
-                            replyToMessageId: imageData.messageId
+                            replyParameters: TGReplyParameters(messageId: message.messageId)
                         )
                     )
                     shapesCounter += shapesPerIteration
@@ -327,7 +327,7 @@ final class DefaultBotHandlers {
                 chatId: .chat(message.chat.id),
                 messageThreadId: nil, // TODO: ???
                 text: "Try send an image...",
-                replyToMessageId: message.messageId
+                replyParameters: TGReplyParameters(messageId: message.messageId)
             )
             state[userId] = .waitImageFromUser
             try await connection.bot.sendMessage(params: params)

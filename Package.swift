@@ -7,10 +7,10 @@ let package = Package(
        .macOS(.v12)
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.76.0"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.90.0"),
         .package(url: "https://github.com/vapor/leaf", from: "4.2.4"),
         .package(url: "https://github.com/vapor/leaf-kit", from: "1.10.2"),
-        .package(url: "https://github.com/nerzh/telegram-vapor-bot", from: "2.4.3"),
+        .package(url: "https://github.com/nerzh/telegram-vapor-bot", from: "2.5.0"),
         .package(url: "https://github.com/valeriyvan/swift-geometrize.git", from: "1.1.2"),
         .package(url: "https://github.com/valeriyvan/jpeg.git", from: "1.0.2"),
         .package(url: "https://github.com/kelvin13/swift-png.git", from: "4.0.2"),
