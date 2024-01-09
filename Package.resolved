@@ -146,8 +146,8 @@
     },
     {
       "identity" : "swift-geometrize",
-      "kind" : "localSourceControl",
-      "location" : "/Users/valeriyvan/Documents/geometrize/swift-geometrize",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/valeriyvan/swift-geometrize.git",
       "state" : {
         "branch" : "feature/asynciterator",
         "revision" : "c82b7e104ce6ed94f55530a6ef1351ae4ad23ab9"
