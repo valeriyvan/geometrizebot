@@ -2,11 +2,13 @@ import Vapor
 import Geometrize
 import Leaf
 
-var cache: [String: (date: Date, iterator: SVGIterator)] = [:]
+var cache: [String: (date: Date, iterator: SVGAsyncIterator)] = [:]
 
-var iterators: [UUID: (date: Date, iterator: SVGIterator)] = [:]
+var iterators: [UUID: (date: Date, iterator: SVGAsyncIterator)] = [:]
 
 func routes(_ app: Application) throws {
+    let updateMarker = "<!--- insert here next shapes --->"
+
     app.get { req in
         cleanup()
         return req.leaf.render("index")
@@ -47,12 +49,13 @@ func routes(_ app: Application) throws {
             throw "Cannot process file \(input.file.filename)"
         }
 
-        let svgSequence: SVGAsyncSequence = try await Geometrizer.geometrize(
+        let svgSequence: SVGAsyncSequence = try await SVGAsyncGeometrizer.geometrize(
             bitmap: bitmap,
             shapeTypes: [selectedShape],
             strokeWidth: 1,
             iterations: steps,
-            shapesPerIteration: shapeCount / steps
+            shapesPerIteration: shapeCount / steps, 
+            iterationOptions: .completeSVGEachIteration
         )
         var asyncIterator = svgSequence.makeAsyncIterator()
         cache[id] = (date: Date(), iterator: asyncIterator)
@@ -112,12 +115,13 @@ func routes(_ app: Application) throws {
             throw "Cannot process file \(input.file.filename)"
         }
 
-        let svgSequence: SVGAsyncSequence = try await Geometrizer.geometrize(
+        let svgSequence: SVGAsyncSequence = try await SVGAsyncGeometrizer.geometrize(
             bitmap: bitmap,
             shapeTypes: [selectedShape],
             strokeWidth: 1,
             iterations: shapeCount,
-            shapesPerIteration: 1
+            shapesPerIteration: 1,
+            iterationOptions: .completeSVGFirstIterationThenDeltas(updateMarker: updateMarker)
         )
         let asyncIterator = svgSequence.makeAsyncIterator()
         let uuid = UUID()
@@ -135,10 +139,19 @@ func routes(_ app: Application) throws {
             try? await ws.close(code: .unacceptableData)
             return
         }
+        var fullSVG: String? = nil
         while let result = try? await iterator.next() {
             let svgLines = result.svg.components(separatedBy: .newlines)
             let svg = svgLines.dropFirst(2).joined(separator: "\n")
-            try? await ws.send(svg)
+            if let _fullSVG = fullSVG {
+                fullSVG = _fullSVG.replacingOccurrences(of: updateMarker, with: svg + updateMarker)
+            } else {
+                fullSVG = svg
+            }
+            guard let fullSVG else {
+                fatalError("Internal inconsistency")
+            }
+            try? await ws.send(fullSVG)
         }
         try? await ws.close()
     }
