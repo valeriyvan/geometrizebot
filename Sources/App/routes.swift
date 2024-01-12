@@ -7,7 +7,7 @@ var cache: [String: (date: Date, iterator: SVGAsyncIterator)] = [:]
 var iterators: [UUID: (date: Date, iterator: SVGAsyncIterator)] = [:]
 
 func routes(_ app: Application) throws {
-    let updateMarker = "<!--- insert here next shapes --->"
+    let updateMarker = "<!-- insert here next shapes -->\n"
 
     app.get { req in
         cleanup()
@@ -139,19 +139,20 @@ func routes(_ app: Application) throws {
             try? await ws.close(code: .unacceptableData)
             return
         }
-        var fullSVG: String? = nil
+        var firstSVG: String? = nil
+        var svgAdOns: String = ""
+        // for try await result in svgSequence { TODO: do this!
         while let result = try? await iterator.next() {
-            let svgLines = result.svg.components(separatedBy: .newlines)
-            let svg = svgLines.dropFirst(2).joined(separator: "\n")
-            if let _fullSVG = fullSVG {
-                fullSVG = _fullSVG.replacingOccurrences(of: updateMarker, with: svg + updateMarker)
+            if let firstSVG {
+                svgAdOns += result.svg
+                let fullSVG = firstSVG.replacingOccurrences(of: updateMarker, with: svgAdOns)
+                try? await ws.send(fullSVG)
             } else {
-                fullSVG = svg
+                let svgLines = result.svg.components(separatedBy: .newlines)
+                let firstSVG_ = svgLines.dropFirst(2).joined(separator: "\n")
+                try? await ws.send(firstSVG_)
+                firstSVG = firstSVG_
             }
-            guard let fullSVG else {
-                fatalError("Internal inconsistency")
-            }
-            try? await ws.send(fullSVG)
         }
         try? await ws.close()
     }
