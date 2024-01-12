@@ -16,8 +16,8 @@ let package = Package(
         // .package(name: "MyPackage", path: "/local/path/to/package"),
         // .package(path: "../Modules/MySwiftLib"),
         // .package(url: "file:///path/to/MySwiftLib", from: "1.0.0"),
+        // .package(url: "../swift-geometrize/", branch: "feature/asynciterator"),
         .package(url: "https://github.com/valeriyvan/swift-geometrize.git", branch: "feature/asynciterator"),
-        //.package(url: "../swift-geometrize/", branch: "feature/asynciterator"),
         .package(url: "https://github.com/valeriyvan/jpeg.git", from: "1.0.2"),
         .package(url: "https://github.com/kelvin13/swift-png.git", from: "4.0.2"),
         .package(url: "https://github.com/awslabs/aws-sdk-swift", exact: "0.17.0")
